@@ -1,5 +1,5 @@
 import React, { useContext } from 'react'
-import { GameProvider, GameContext } from '../context/GameContext'
+import { GameContext } from '../context/GameContext'
 import DeckSetup from '../components/DeckSetup'
 import HeroPowerSetup from '../components/HeroPowerSetup'
 import PassiveSkillsSetup from '../components/PassiveSkillsSetup'
@@ -57,11 +57,9 @@ function InnerApp() {
 
 export default function AppScreen() {
   return (
-    <GameProvider>
-      <ErrorBoundary>
-        <InnerApp />
-        <GlobalErrorCatcher />
-      </ErrorBoundary>
-    </GameProvider>
+    <ErrorBoundary>
+      <InnerApp />
+      <GlobalErrorCatcher />
+    </ErrorBoundary>
   )
 }

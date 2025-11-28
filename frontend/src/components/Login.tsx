@@ -15,7 +15,7 @@ const Login = () => {
     e.preventDefault()
     try {
       const endpoint = isRegister ? '/api/auth/register' : '/api/auth/login'
-      const response = await axios.post(`http://localhost:8080${endpoint}`, {
+      const response = await axios.post(`http://localhost:9090${endpoint}`, {
         username,
         password,
       })

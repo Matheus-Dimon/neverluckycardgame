@@ -4,6 +4,7 @@ import Login from './components/Login'
 import Game from './components/Game'
 import ProtectedRoute from './components/ProtectedRoute'
 import { AuthProvider } from './AuthContext'
+import { GameProvider } from './game/context/GameContext'
 import './App.css'
 
 function App() {
@@ -15,7 +16,9 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/game" element={
             <ProtectedRoute>
-              <Game />
+              <GameProvider>
+                <Game />
+              </GameProvider>
             </ProtectedRoute>
           } />
         </Routes>
