@@ -4,7 +4,7 @@ import { CARD_OPTIONS, HERO_POWER_OPTIONS, HERO_PASSIVE_OPTIONS, STARTING_HP, ST
 
 export const GameContext = createContext(null)
 
-const API_BASE_URL = 'http://localhost:8080/api/game'
+const API_BASE_URL = 'http://localhost:9090/api/game'
 const STARTING_DECK_SIZE = 15
 
 // Convert API DTO to frontend format
@@ -166,9 +166,8 @@ export function GameProvider({ children }) {
   const createGame = useCallback(async (player1Id = 1) => { // Default player ID for now
     setLoading(true)
     try {
-      const gameDTO = await apiCall('/create', {
-        method: 'POST',
-        body: JSON.stringify({ player1Id })
+      const gameDTO = await apiCall(`/create?player1Id=${player1Id}`, {
+        method: 'POST'
       })
       const gameState = convertGameDTOToState(gameDTO)
       setState(gameState)
