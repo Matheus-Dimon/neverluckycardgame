@@ -38,13 +38,13 @@ const Header: React.FC = () => {
               <span className="relative z-10">Home</span>
               <div className="absolute inset-0 bg-gradient-to-r from-red-900/20 to-yellow-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
             </a>
-            <a
-              href="#game"
-              className="gothic-body text-gray-200 hover:text-yellow-400 transition-all duration-300 py-2 px-4 rounded-2xl border-transparent hover:border-metallic hover:glow-gold hover:shadow-2xl hover:brightness-110 ring-1 ring-transparent hover:ring-2 ring-yellow-500/20 relative group"
+            <button
+              onClick={() => navigate('/game')}
+              className="gothic-body text-gray-200 hover:text-yellow-400 transition-all duration-300 py-2 px-4 rounded-2xl border-transparent hover:border-metallic hover:glow-gold hover:shadow-2xl hover:brightness-110 ring-1 ring-transparent hover:ring-2 ring-yellow-500/20 relative group cursor-pointer"
             >
               <span className="relative z-10">Game</span>
               <div className="absolute inset-0 bg-gradient-to-r from-red-900/20 to-yellow-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
-            </a>
+            </button>
             <a
               href="#about"
               className="gothic-body text-gray-200 hover:text-yellow-400 transition-all duration-300 py-2 px-4 rounded-2xl border-transparent hover:border-metallic hover:glow-gold hover:shadow-2xl hover:brightness-110 ring-1 ring-transparent hover:ring-2 ring-yellow-500/20 relative group"

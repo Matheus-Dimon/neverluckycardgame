@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface MenuProps {
   isOpen: boolean;
@@ -6,6 +7,8 @@ interface MenuProps {
 }
 
 const Menu: React.FC<MenuProps> = ({ isOpen, onClose }) => {
+  const navigate = useNavigate();
+
   if (!isOpen) return null;
 
   return (
@@ -39,14 +42,13 @@ const Menu: React.FC<MenuProps> = ({ isOpen, onClose }) => {
             <span className="relative z-10">Home</span>
             <div className="absolute inset-0 bg-gradient-to-r from-red-900/20 to-yellow-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
           </a>
-          <a
-            href="#game"
-            className="gothic-body text-gray-200 hover:text-yellow-400 transition-all duration-300 text-xl py-3 px-6 rounded-2xl border-metallic hover:border-ornate hover:shadow-2xl hover:glow-gold hover:brightness-110 transform hover:scale-105 hover:-translate-y-1 ring-1 ring-transparent hover:ring-2 ring-yellow-500/20 relative group"
-            onClick={onClose}
+          <button
+            onClick={() => { onClose(); navigate('/game'); }}
+            className="gothic-body text-gray-200 hover:text-yellow-400 transition-all duration-300 text-xl py-3 px-6 rounded-2xl border-metallic hover:border-ornate hover:shadow-2xl hover:glow-gold hover:brightness-110 transform hover:scale-105 hover:-translate-y-1 ring-1 ring-transparent hover:ring-2 ring-yellow-500/20 relative group cursor-pointer"
           >
             <span className="relative z-10">Game</span>
             <div className="absolute inset-0 bg-gradient-to-r from-red-900/20 to-yellow-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
-          </a>
+          </button>
           <a
             href="#about"
             className="gothic-body text-gray-200 hover:text-yellow-400 transition-all duration-300 text-xl py-3 px-6 rounded-2xl border-metallic hover:border-ornate hover:shadow-2xl hover:glow-gold hover:brightness-110 transform hover:scale-105 hover:-translate-y-1 ring-1 ring-transparent hover:ring-2 ring-yellow-500/20 relative group"
