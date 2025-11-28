@@ -1,11 +1,15 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import { useAuth } from '../AuthContext'
 
 const Login = () => {
   const [isRegister, setIsRegister] = useState(false)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [message, setMessage] = useState('')
+  const navigate = useNavigate()
+  const { login } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -17,7 +21,8 @@ const Login = () => {
       })
       setMessage(response.data)
       if (response.data === 'Login successful') {
-        // Navigate to game or something, but for now just message
+        login()
+        navigate('/game')
       }
     } catch (error: any) {
       setMessage(error.response?.data || 'Error occurred')

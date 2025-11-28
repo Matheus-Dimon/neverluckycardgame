@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from './Button';
 import Menu from './Menu';
+import { useAuth } from '../AuthContext';
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { logout } = useAuth();
 
   return (
     <>
@@ -54,8 +56,8 @@ const Header: React.FC = () => {
 
           {/* Actions */}
           <div className="flex items-center space-x-4">
-            <Button onClick={() => navigate('/login')} size="sm" variant="secondary">
-              Enter Realm
+            <Button onClick={() => { logout(); navigate('/login'); }} size="sm" variant="secondary">
+              Logout
             </Button>
             <button
               onClick={() => setIsMenuOpen(true)}

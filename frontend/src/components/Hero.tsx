@@ -58,8 +58,8 @@ const Hero: React.FC = () => {
           <div className="absolute -bottom-2 -right-2 w-4 h-4 border-b-2 border-r-2 border-yellow-500"></div>
         </div>
 
-        <Button onClick={() => navigate('/login')} size="lg" variant="accent">
-          Enter the Abyss
+        <Button onClick={() => navigate('/game')} size="lg" variant="accent">
+          Game
         </Button>
       </div>
 
