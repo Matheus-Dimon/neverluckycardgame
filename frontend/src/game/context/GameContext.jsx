@@ -4,7 +4,7 @@ import { CARD_OPTIONS, HERO_POWER_OPTIONS, HERO_PASSIVE_OPTIONS, STARTING_HP, ST
 
 export const GameContext = createContext(null)
 
-const API_BASE_URL = 'http://localhost:9090/api/game'
+const API_BASE_URL = 'http://localhost:9092/api/game'
 const STARTING_DECK_SIZE = 15
 
 // Convert API DTO to frontend format
@@ -140,10 +140,15 @@ const apiCall = async (endpoint, options = {}) => {
 
 /* ------------------- PROVIDER WITH API ------------------- */
 export function GameProvider({ children }) {
-  const [state, setState] = useState(null)
+  const [state, setState] = useState(initialState)
   const [gameId, setGameId] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [selectedData, setSelectedData] = useState({
+    passiveSkills: [],
+    deckCards: [],
+    heroPowers: []
+  })
 
   // Load game state from API
   const loadGame = useCallback(async (id) => {
@@ -184,7 +189,6 @@ export function GameProvider({ children }) {
 
   // Generic action dispatcher that calls API
   const dispatch = useCallback(async (action) => {
-    if (!gameId) return
 
     setLoading(true)
     try {
@@ -194,7 +198,25 @@ export function GameProvider({ children }) {
 
       switch (action.type) {
         case 'START_GAME':
-          endpoint += '/start'
+          // Create game first if it doesn't exist
+          let gameIdToUse = gameId
+          if (!gameIdToUse) {
+            try {
+              gameIdToUse = await createGame()
+              setGameId(gameIdToUse)
+            } catch (err) {
+              setError(err.message)
+              setLoading(false)
+              return
+            }
+          }
+          endpoint = `/${gameIdToUse}/start`
+          // Send selected data to backend
+          body = {
+            selectedPassiveSkills: selectedData.passiveSkills,
+            selectedDeckCards: selectedData.deckCards,
+            selectedHeroPowers: selectedData.heroPowers
+          }
           break
         case 'PLAY_CARD':
           endpoint += '/play-card'
@@ -239,6 +261,12 @@ export function GameProvider({ children }) {
         case 'INITIATE_ANIMATION':
         case 'END_ANIMATION':
         case 'SET_AI_PROCESSING':
+        case 'GO_TO_PASSIVE_SKILLS':
+        case 'SET_SELECTED_PASSIVE_SKILLS':
+        case 'GO_TO_DECK_SETUP':
+        case 'SET_SELECTED_DECK_CARDS':
+        case 'GO_TO_HERO_POWER_OPTIONS':
+        case 'SET_SELECTED_HERO_POWERS':
           setState(prevState => {
             if (!prevState) return prevState
             // Handle local state updates
@@ -262,6 +290,39 @@ export function GameProvider({ children }) {
                 return {
                   ...prevState,
                   isAITurnProcessing: !!action.payload
+                }
+              case 'GO_TO_PASSIVE_SKILLS':
+                return {
+                  ...prevState,
+                  gamePhase: 'PASSIVE_SKILLS'
+                }
+              case 'SET_SELECTED_PASSIVE_SKILLS':
+                setSelectedData(prev => ({ ...prev, passiveSkills: action.payload }))
+                return {
+                  ...prevState,
+                  selectedPassiveSkills: action.payload
+                }
+              case 'GO_TO_DECK_SETUP':
+                return {
+                  ...prevState,
+                  gamePhase: 'SETUP'
+                }
+              case 'SET_SELECTED_DECK_CARDS':
+                setSelectedData(prev => ({ ...prev, deckCards: action.payload }))
+                return {
+                  ...prevState,
+                  selectedDeckCards: action.payload
+                }
+              case 'GO_TO_HERO_POWER_OPTIONS':
+                return {
+                  ...prevState,
+                  gamePhase: 'HERO_POWER_OPTIONS'
+                }
+              case 'SET_SELECTED_HERO_POWERS':
+                setSelectedData(prev => ({ ...prev, heroPowers: action.payload }))
+                return {
+                  ...prevState,
+                  selectedHeroPowers: action.payload
                 }
               default:
                 return prevState

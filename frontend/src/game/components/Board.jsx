@@ -243,6 +243,20 @@ export default function Board() {
   const { state, dispatch } = useContext(GameContext)
   const { player1, player2, turn, animation, targeting, gameOver, winner } = state
 
+  // Handle case where game data hasn't loaded yet
+  if (!player1 || !player2) {
+    return (
+      <div className="board-container">
+        <div className="board-root" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+          <div>Loading game...</div>
+          <div style={{ position: 'absolute', top: 10, left: 10, background: 'black', color: 'white', padding: '10px', fontSize: '12px' }}>
+            Debug: player1: {player1 ? 'exists' : 'null'}, player2: {player2 ? 'exists' : 'null'}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   const playCard = (card) => {
     if (turn !== 1) return
     playSound('cardPlaySynth')
@@ -698,6 +712,30 @@ export default function Board() {
 
   return (
     <div className="board-container">
+      {/* Debug info */}
+      <div style={{
+        position: 'absolute',
+        top: 10,
+        left: 10,
+        background: 'black',
+        color: 'white',
+        padding: '10px',
+        fontSize: '12px',
+        zIndex: 10000,
+        maxWidth: '600px'
+      }}>
+        <div>Hand: {player1.hand?.length || 0} cards</div>
+        <div>Hero Powers: {player1.heroPowers?.length || 0}</div>
+        <div>Passive Skills: {player1.passiveSkills?.length || 0}</div>
+        <div>Selected Cards: {state.selectedDeckCards?.length || 0}</div>
+        <div>Selected Powers: {state.selectedHeroPowers?.length || 0}</div>
+        <div>Game Phase: {state.gamePhase}</div>
+        <div>Game ID: {state.id || 'null'}</div>
+        <div>Player1 HP: {player1.hp}</div>
+        <div>Player1 Mana: {player1.mana}</div>
+        <div>Turn: {state.turn}</div>
+      </div>
+
       <div className="board-root">
       <div className="board-section board-top">
         <div className="hero-area">
