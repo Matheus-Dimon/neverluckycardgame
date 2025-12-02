@@ -21,7 +21,9 @@ body{
   margin:20px auto;
   padding:20px;
   border-radius:16px;
-  background: linear-gradient(180deg,rgba(15,23,42,0.9),rgba(0,0,0,0.85));
+  background: url('../images/background.jpg');
+  background-size: cover;
+  background-position: center;
   box-shadow:0 20px 60px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.05);
   border: 2px solid rgba(139,92,46,0.3);
   backdrop-filter: blur(10px);
@@ -1454,7 +1456,10 @@ body{
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: #1a1a1a; /* Fallback color */
+  background: url('../images/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   color: white;
   position: relative;
   z-index: 1;
@@ -1604,9 +1609,9 @@ body{
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(0,0,0,0.98) 100%),
-              url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1920&h=1080&fit=crop&q=80');
+  background: url('../images/background.jpg');
   background-size: cover;
+  background-position: center;
   background-attachment: fixed;
   padding: 20px;
 }
@@ -1724,7 +1729,7 @@ body{
   align-items: center;
   min-height: 100vh;
   background: linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(0,0,0,0.98) 100%),
-              url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1920&h=1080&fit=crop&q=80');
+              url('./../images/background.jpg');
   background-size: cover;
   background-attachment: fixed;
   padding: 20px;

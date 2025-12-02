@@ -6,7 +6,7 @@ import AppScreen from './screens/AppScreen';
 import './styles/styles.css';
 
 const App = () => {
-  const [currentScreen, setCurrentScreen] = useState('home');
+  const [currentScreen, setCurrentScreen] = useState('register');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
 
