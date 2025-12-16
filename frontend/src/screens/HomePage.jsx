@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
+import InteractiveTutorial from '../components/InteractiveTutorial';
 import '../styles/styles.css';
 
 const HomePage = ({ onNavigateToLogin, onNavigateToRegister }) => {
   const { language, switchLanguage, t } = useLanguage();
+  const [showTutorial, setShowTutorial] = useState(false);
 
   const handleLanguageSwitch = () => {
     switchLanguage(language === 'pt' ? 'en' : 'pt');
@@ -46,6 +48,26 @@ const HomePage = ({ onNavigateToLogin, onNavigateToRegister }) => {
           </button>
         </div>
 
+        <div style={{ marginTop: '30px', textAlign: 'center' }}>
+          <button
+            className="homepage-button"
+            onClick={() => setShowTutorial(true)}
+            style={{
+              padding: '12px 30px',
+              background: 'linear-gradient(135deg, #8b5a2b, #a67c52)',
+              color: 'white',
+              border: '2px solid #f5c06b',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              marginTop: '10px'
+            }}
+          >
+            📖 {t('tutorial.start') || 'Start Tutorial'}
+          </button>
+        </div>
+
         <div className="game-features">
           <div className="feature">
             <h3>{t('features.decks.title')}</h3>
@@ -61,6 +83,11 @@ const HomePage = ({ onNavigateToLogin, onNavigateToRegister }) => {
           </div>
         </div>
       </div>
+
+      <InteractiveTutorial
+        isOpen={showTutorial}
+        onClose={() => setShowTutorial(false)}
+      />
     </div>
   );
 };

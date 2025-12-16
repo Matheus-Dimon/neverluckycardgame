@@ -48,7 +48,58 @@ const translations = {
 
     // Language
     switchToEnglish: "Switch to English",
-    switchToPortuguese: "Mudar para Português"
+    switchToPortuguese: "Mudar para Português",
+
+    // Tutorial
+    tutorial: {
+      start: "Iniciar Tutorial",
+      previous: "Anterior",
+      next: "Próximo",
+      finish: "Finalizar",
+      skip: "Pular Tutorial",
+      welcome: {
+        title: "Bem-vindo ao NeverLucky!",
+        content: "Este tutorial irá ensinar os conceitos básicos do jogo. Vamos começar!"
+      },
+      objective: {
+        title: "Objetivo do Jogo",
+        content: "O objetivo é reduzir os pontos de vida do herói inimigo a 0. Você vence atacando o herói inimigo ou usando habilidades especiais."
+      },
+      board: {
+        title: "O Campo de Batalha",
+        content: "As unidades são colocadas em duas fileiras: Corpo a corpo (ataque próximo) e À distância (ataques longos). Unidades corpo a corpo podem atacar o herói inimigo se não houver unidades corpo a corpo inimigas."
+      },
+      units: {
+        title: "Tipos de Unidade",
+        content: "Existem três tipos de unidade: Guerreiros (corpo a corpo), Arqueiros (à distância) e Clérigos (curandeiros). Cada um tem habilidades e estilos de jogo únicos."
+      },
+      mana: {
+        title: "Sistema de Mana",
+        content: "Você ganha 1 cristal de mana a cada turno (máximo 10). Use mana para jogar cartas e ativar poderes de herói. Sua mana é renovada a cada turno!"
+      },
+      heroPowers: {
+        title: "Poderes de Herói",
+        content: "Cada herói tem poderes únicos que você pode usar uma vez por turno. Eles custam mana e podem causar dano, curar ou fornecer efeitos especiais."
+      },
+      cardEffects: {
+        title: "Efeitos das Cartas",
+        content: "As cartas têm efeitos especiais como Investida (ataca imediatamente), Provocação (deve ser atacado primeiro) ou Grito de Batalha (efeito ao ser jogada)."
+      },
+      turns: {
+        title: "Estrutura dos Turnos",
+        content: "Cada turno: Compre uma carta, jogue cartas, use poder de herói, ataque com unidades, então termine o turno. Planeje seus movimentos estrategicamente!"
+      },
+      strategy: {
+        title: "Estratégia Básica",
+        content: "Controle o campo com unidades corpo a corpo, use unidades à distância para dano seguro, cure com clérigos e use os poderes de herói no momento certo."
+      }
+    },
+
+    // Game Log
+    gamelog: {
+      empty: "Nenhuma ação ainda...",
+      entries: "entradas"
+    }
   },
   en: {
     // HomePage
@@ -99,7 +150,58 @@ const translations = {
 
     // Language
     switchToEnglish: "Switch to English",
-    switchToPortuguese: "Mudar para Português"
+    switchToPortuguese: "Mudar para Português",
+
+    // Tutorial
+    tutorial: {
+      start: "Start Tutorial",
+      previous: "Previous",
+      next: "Next",
+      finish: "Finish",
+      skip: "Skip Tutorial",
+      welcome: {
+        title: "Welcome to NeverLucky!",
+        content: "This tutorial will teach you the basic concepts of the game. Let's get started!"
+      },
+      objective: {
+        title: "Game Objective",
+        content: "The goal is to reduce your opponent's hero HP to 0. You win by attacking their hero or using special abilities."
+      },
+      board: {
+        title: "The Battlefield",
+        content: "Units are placed in two lanes: Melee (close combat) and Ranged (distance attacks). Melee units can attack the enemy hero if no enemy melee units are present."
+      },
+      units: {
+        title: "Unit Types",
+        content: "There are three unit types: Warriors (melee), Archers (ranged), and Clerics (healers). Each has unique abilities and playstyles."
+      },
+      mana: {
+        title: "Mana System",
+        content: "You gain 1 mana crystal each turn (maximum 10). Use mana to play cards and activate hero powers. Your mana refreshes each turn!"
+      },
+      heroPowers: {
+        title: "Hero Powers",
+        content: "Each hero has unique powers you can use once per turn. They cost mana and can deal damage, heal, or provide special effects."
+      },
+      cardEffects: {
+        title: "Card Effects",
+        content: "Cards have special effects like Charge (attack immediately), Taunt (must be attacked first), or Battlecry (effect when played)."
+      },
+      turns: {
+        title: "Turn Structure",
+        content: "Each turn: Draw a card, play cards, use hero power, attack with units, then end turn. Plan your moves strategically!"
+      },
+      strategy: {
+        title: "Basic Strategy",
+        content: "Control the board with melee units, use ranged for safe damage, heal with clerics, and time your hero powers wisely."
+      }
+    },
+
+    // Game Log
+    gamelog: {
+      empty: "No actions yet...",
+      entries: "entries"
+    }
   }
 };
 

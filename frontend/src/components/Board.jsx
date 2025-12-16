@@ -6,6 +6,7 @@ import { GameContext } from '../context/GameContext.jsx'
 import HeroPowerBadge from './HeroPowerBadge.jsx'
 import GameOverModal from './GameOverModal.jsx'
 import InstructionsPanel from './InstructionsPanel.jsx'
+import GameLog from './GameLog.jsx'
 import AnimationLayer from './AnimationLayer.jsx'
 import { HERO_IMAGES, HERO_PASSIVE_OPTIONS } from '../utils/constants.js'
 
@@ -852,6 +853,7 @@ export default function Board() {
     </div>
 
     <InstructionsPanel />
+    <GameLog log={[]} />
   </div>
   )
 }
