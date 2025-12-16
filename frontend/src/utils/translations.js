@@ -117,24 +117,78 @@ const translations = {
       },
       dynamic: {
         card_played: {
-          title: "Card Played!",
-          message: "You placed a unit on the field! It can now attack on the next turn."
+          title: "Carta Jogada!",
+          message: "Você colocou uma unidade no campo! Agora ela pode atacar no próximo turno."
         },
         attack: {
-          title: "Attack Executed!",
-          message: "Your unit attacked! Each unit can attack only once per turn."
+          title: "Ataque Realizado!",
+          message: "Sua unidade atacou! Cada unidade pode atacar apenas uma vez por turno."
         },
         hero_power: {
-          title: "Hero Power Used!",
-          message: "You activated the hero power! It can be used only once per turn."
+          title: "Poder do Herói Usado!",
+          message: "Você ativou o poder do herói! Pode usar apenas uma vez por turno."
         },
         turn_start: {
-          title: "New Turn!",
-          message: "Your turn has started! You gained mana and a card. Plan your actions!"
+          title: "Novo Turno!",
+          message: "Seu turno começou! Você ganhou mana e uma carta. Planeje suas ações!"
         },
         heal: {
-          title: "Heal Applied!",
-          message: "Your unit healed an ally! Clerics can heal instead of attacking."
+          title: "Cura Aplicada!",
+          message: "Sua unidade curou um aliado! Clérigos podem curar em vez de atacar."
+        }
+      },
+      immersive_tutorial: {
+        welcome: {
+          title: "Bem-vindo ao NeverLucky!",
+          message: "Este é um jogo de cartas onde você constrói seu exército e batalha contra seu oponente. Seu objetivo é reduzir os pontos de vida do herói inimigo a zero. Vamos aprender como jogar!"
+        },
+        interface: {
+          title: "Vamos explorar a interface",
+          message: "Veja as áreas principais do tabuleiro. Uma seta irá apontar para cada elemento importante."
+        },
+        hand: {
+          title: "Sua Mão",
+          message: "Estas são as cartas em sua mão. Cada carta mostra seu custo, ataque e defesa. Clique em uma carta para jogá-la!"
+        },
+        mana: {
+          title: "Cristais de Mana",
+          message: "Estes cristais brilhantes mostram sua mana. Você precisa de mana para jogar cartas. Você ganha 1 mais a cada turno, até 10!"
+        },
+        board: {
+          title: "Campo de Batalha",
+          message: "Unidades são colocadas em duas pistas: Corpo a corpo (combate próximo) e À distância (ataques longos). Unidades corpo a corpo podem atacar o herói inimigo se não houver unidades corpo a corpo inimigas bloqueando."
+        },
+        hero: {
+          title: "Seu Herói",
+          message: "Este é seu herói! Se seus pontos de vida chegarem a zero, você perde o jogo. Proteja-o com suas unidades!"
+        },
+        first_action: {
+          title: "Sua Primeira Ação: Comprar Cartas",
+          message: "No início de cada turno, você compra uma carta do seu deck. Isso dá mais opções para jogar!"
+        },
+        play_card: {
+          title: "Jogando Sua Primeira Carta",
+          message: "Clique em uma carta em sua mão que custe menos ou igual à sua mana atual. Assista ela aparecer no campo de batalha!"
+        },
+        card_costs: {
+          title: "Entendendo Custos e Efeitos das Cartas",
+          message: "Cada carta custa mana para jogar. Algumas cartas têm efeitos especiais quando jogadas, como causar dano ou curar aliados."
+        },
+        combat: {
+          title: "Combate Básico",
+          message: "Clique em uma de suas unidades para selecioná-la, então clique em uma unidade ou herói inimigo para atacar. Sua unidade causa dano e pode tomar dano de volta!"
+        },
+        turn_flow: {
+          title: "Fluxo dos Turnos",
+          message: "Cada turno: Compre uma carta, ganhe mana, jogue cartas, use poderes de herói, ataque com unidades, então termine o turno. O jogo flui de um lado para o outro!"
+        },
+        feedback: {
+          title: "Muito Bem!",
+          message: "Você está indo fantasticamente! Você aprendeu os conceitos básicos do NeverLucky. Continue praticando e você dominará o jogo em pouco tempo!"
+        },
+        next_steps: {
+          title: "Pronto para Mais?",
+          message: "Agora você sabe como jogar! Tente uma partida completa contra a IA, ou desafie um amigo. Lembre-se: estratégia, timing e posicionamento de unidades são chave para a vitória!"
         }
       }
     },

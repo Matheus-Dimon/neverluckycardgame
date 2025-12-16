@@ -8,7 +8,7 @@ import GameOverModal from './GameOverModal.jsx'
 import InstructionsPanel from './InstructionsPanel.jsx'
 import GameLog from './GameLog.jsx'
 import AnimationLayer from './AnimationLayer.jsx'
-import TutorialOverlay from './TutorialOverlay.jsx'
+import ImmersiveTutorial from './ImmersiveTutorial.jsx'
 import DynamicTutorialMessages from './DynamicTutorialMessages.jsx'
 import { HERO_IMAGES, HERO_PASSIVE_OPTIONS } from '../utils/constants.js'
 
@@ -868,7 +868,10 @@ export default function Board() {
     <GameLog log={gameLog} />
 
     {tutorialMode && (
-      <TutorialOverlay
+      <ImmersiveTutorial
+        isOpen={tutorialMode}
+        onClose={() => dispatch({ type: 'CLEAR_TUTORIAL_MESSAGE' })}
+        onAdvanceTutorial={(step) => dispatch({ type: 'ADVANCE_TUTORIAL' })}
         tutorialStep={tutorialStep}
         tutorialHighlights={tutorialHighlights}
         tutorialMessage={tutorialMessage}
