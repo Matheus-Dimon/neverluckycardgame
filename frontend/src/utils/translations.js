@@ -1,0 +1,106 @@
+const translations = {
+  pt: {
+    // HomePage
+    gameTitle: "NeverLucky Card Game",
+    gameDescription: "Um jogo de cartas estratégico onde você constrói seu deck, seleciona poderes de herói e enfrenta adversários em batalhas épicas.",
+    loginButton: "Entrar",
+    registerButton: "Cadastrar",
+    features: {
+      decks: {
+        title: "🃏 Decks Personalizados",
+        description: "Monte seu deck com cartas únicas de guerreiros, arqueiros e clérigos."
+      },
+      heroPowers: {
+        title: "⚔️ Poderes de Herói",
+        description: "Escolha poderes especiais que definem seu estilo de jogo."
+      },
+      battles: {
+        title: "🎯 Batalhas Estratégicas",
+        description: "Posicione suas unidades em linhas melee e ranged para controlar o campo de batalha."
+      }
+    },
+
+    // LoginPage
+    loginTitle: "Entrar no Jogo",
+    usernameLabel: "Nome de Usuário",
+    passwordLabel: "Senha",
+    usernamePlaceholder: "Digite seu nome de usuário",
+    passwordPlaceholder: "Digite sua senha",
+    loginButtonText: "Entrar",
+    loggingIn: "Entrando...",
+    noAccount: "Não tem conta? Cadastre-se",
+    backToHome: "Voltar ao início",
+    loginError: "Nome de usuário ou senha incorretos",
+    connectionError: "Erro de conexão. Verifique se o servidor está rodando.",
+
+    // RegisterPage
+    registerTitle: "Cadastrar Jogador",
+    confirmPasswordLabel: "Confirmar Senha",
+    confirmPasswordPlaceholder: "Confirme sua senha",
+    registerButtonText: "Cadastrar",
+    registering: "Cadastrando...",
+    hasAccount: "Já tem conta? Faça login",
+    allFieldsRequired: "Todos os campos são obrigatórios",
+    passwordsDontMatch: "As senhas não coincidem",
+    passwordTooShort: "A senha deve ter pelo menos 6 caracteres",
+    registrationSuccess: "Cadastro realizado com sucesso! Faça o login para continuar.",
+    registrationError: "Erro ao cadastrar usuário",
+
+    // Language
+    switchToEnglish: "Switch to English",
+    switchToPortuguese: "Mudar para Português"
+  },
+  en: {
+    // HomePage
+    gameTitle: "NeverLucky Card Game",
+    gameDescription: "A strategic card game where you build your deck, select hero powers, and face opponents in epic battles.",
+    loginButton: "Login",
+    registerButton: "Register",
+    features: {
+      decks: {
+        title: "🃏 Custom Decks",
+        description: "Build your deck with unique cards of warriors, archers, and clerics."
+      },
+      heroPowers: {
+        title: "⚔️ Hero Powers",
+        description: "Choose special powers that define your playstyle."
+      },
+      battles: {
+        title: "🎯 Strategic Battles",
+        description: "Position your units in melee and ranged lines to control the battlefield."
+      }
+    },
+
+    // LoginPage
+    loginTitle: "Login to Game",
+    usernameLabel: "Username",
+    passwordLabel: "Password",
+    usernamePlaceholder: "Enter your username",
+    passwordPlaceholder: "Enter your password",
+    loginButtonText: "Login",
+    loggingIn: "Logging in...",
+    noAccount: "Don't have an account? Register",
+    backToHome: "Back to Home",
+    loginError: "Invalid username or password",
+    connectionError: "Connection error. Check if the server is running.",
+
+    // RegisterPage
+    registerTitle: "Register Player",
+    confirmPasswordLabel: "Confirm Password",
+    confirmPasswordPlaceholder: "Confirm your password",
+    registerButtonText: "Register",
+    registering: "Registering...",
+    hasAccount: "Already have an account? Login",
+    allFieldsRequired: "All fields are required",
+    passwordsDontMatch: "Passwords do not match",
+    passwordTooShort: "Password must be at least 6 characters",
+    registrationSuccess: "Registration successful! Please login to continue.",
+    registrationError: "Error registering user",
+
+    // Language
+    switchToEnglish: "Switch to English",
+    switchToPortuguese: "Mudar para Português"
+  }
+};
+
+export default translations;

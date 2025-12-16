@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 import '../styles/styles.css';
 
 const RegisterPage = ({ onNavigateToLogin, onNavigateToHome }) => {
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -25,17 +27,17 @@ const RegisterPage = ({ onNavigateToLogin, onNavigateToHome }) => {
 
     // Validation
     if (!formData.username || !formData.password || !formData.confirmPassword) {
-      setError('Todos os campos são obrigatórios');
+      setError(t('allFieldsRequired'));
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError('As senhas não coincidem');
+      setError(t('passwordsDontMatch'));
       return;
     }
 
     if (formData.password.length < 6) {
-      setError('A senha deve ter pelo menos 6 caracteres');
+      setError(t('passwordTooShort'));
       return;
     }
 
@@ -56,14 +58,14 @@ const RegisterPage = ({ onNavigateToLogin, onNavigateToHome }) => {
 
       if (response.ok) {
         // Registration successful
-        alert('Cadastro realizado com sucesso! Faça o login para continuar.');
+        alert(t('registrationSuccess'));
         onNavigateToLogin();
       } else {
         const errorData = await response.text();
-        setError(errorData || 'Erro ao cadastrar usuário');
+        setError(errorData || t('registrationError'));
       }
     } catch (error) {
-      setError('Erro de conexão. Verifique se o servidor está rodando.');
+      setError(t('connectionError'));
     } finally {
       setLoading(false);
     }
@@ -72,44 +74,44 @@ const RegisterPage = ({ onNavigateToLogin, onNavigateToHome }) => {
   return (
     <div className="register-container">
       <div className="register-form">
-        <h2>Cadastrar Jogador</h2>
+        <h2>{t('registerTitle')}</h2>
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="username">Nome de Usuário</label>
+            <label htmlFor="username">{t('usernameLabel')}</label>
             <input
               type="text"
               id="username"
               name="username"
               value={formData.username}
               onChange={handleInputChange}
-              placeholder="Digite seu nome de usuário"
+              placeholder={t('usernamePlaceholder')}
               required
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Senha</label>
+            <label htmlFor="password">{t('passwordLabel')}</label>
             <input
               type="password"
               id="password"
               name="password"
               value={formData.password}
               onChange={handleInputChange}
-              placeholder="Digite sua senha"
+              placeholder={t('passwordPlaceholder')}
               required
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="confirmPassword">Confirmar Senha</label>
+            <label htmlFor="confirmPassword">{t('confirmPasswordLabel')}</label>
             <input
               type="password"
               id="confirmPassword"
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleInputChange}
-              placeholder="Confirme sua senha"
+              placeholder={t('confirmPasswordPlaceholder')}
               required
             />
           </div>
@@ -117,16 +119,16 @@ const RegisterPage = ({ onNavigateToLogin, onNavigateToHome }) => {
           {error && <div className="error-message">{error}</div>}
 
           <button type="submit" className="register-button" disabled={loading}>
-            {loading ? 'Cadastrando...' : 'Cadastrar'}
+            {loading ? t('registering') : t('registerButtonText')}
           </button>
         </form>
 
         <div className="register-links">
           <button className="link-button" onClick={onNavigateToLogin}>
-            Já tem conta? Faça login
+            {t('hasAccount')}
           </button>
           <button className="link-button" onClick={onNavigateToHome}>
-            Voltar ao início
+            {t('backToHome')}
           </button>
         </div>
       </div>

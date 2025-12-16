@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 import '../styles/styles.css';
 
 const LoginPage = ({ onNavigateToRegister, onNavigateToHome, onLoginSuccess }) => {
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     username: '',
     password: ''
@@ -24,7 +26,7 @@ const LoginPage = ({ onNavigateToRegister, onNavigateToHome, onLoginSuccess }) =
 
     // Validation
     if (!formData.username || !formData.password) {
-      setError('Nome de usuário e senha são obrigatórios');
+      setError(t('allFieldsRequired'));
       return;
     }
 
@@ -51,10 +53,10 @@ const LoginPage = ({ onNavigateToRegister, onNavigateToHome, onLoginSuccess }) =
         }));
         onLoginSuccess();
       } else {
-        setError('Nome de usuário ou senha incorretos');
+        setError(t('loginError'));
       }
     } catch (error) {
-      setError('Erro de conexão. Verifique se o servidor está rodando.');
+      setError(t('connectionError'));
     } finally {
       setLoading(false);
     }
@@ -63,31 +65,31 @@ const LoginPage = ({ onNavigateToRegister, onNavigateToHome, onLoginSuccess }) =
   return (
     <div className="login-container">
       <div className="login-form">
-        <h2>Entrar no Jogo</h2>
+        <h2>{t('loginTitle')}</h2>
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="username">Nome de Usuário</label>
+            <label htmlFor="username">{t('usernameLabel')}</label>
             <input
               type="text"
               id="username"
               name="username"
               value={formData.username}
               onChange={handleInputChange}
-              placeholder="Digite seu nome de usuário"
+              placeholder={t('usernamePlaceholder')}
               required
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Senha</label>
+            <label htmlFor="password">{t('passwordLabel')}</label>
             <input
               type="password"
               id="password"
               name="password"
               value={formData.password}
               onChange={handleInputChange}
-              placeholder="Digite sua senha"
+              placeholder={t('passwordPlaceholder')}
               required
             />
           </div>
@@ -95,16 +97,16 @@ const LoginPage = ({ onNavigateToRegister, onNavigateToHome, onLoginSuccess }) =
           {error && <div className="error-message">{error}</div>}
 
           <button type="submit" className="login-button" disabled={loading}>
-            {loading ? 'Entrando...' : 'Entrar'}
+            {loading ? t('loggingIn') : t('loginButtonText')}
           </button>
         </form>
 
         <div className="login-links">
           <button className="link-button" onClick={onNavigateToRegister}>
-            Não tem conta? Cadastre-se
+            {t('noAccount')}
           </button>
           <button className="link-button" onClick={onNavigateToHome}>
-            Voltar ao início
+            {t('backToHome')}
           </button>
         </div>
       </div>
