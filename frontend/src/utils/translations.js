@@ -57,6 +57,28 @@ const translations = {
       next: "Próximo",
       finish: "Finalizar",
       skip: "Pular Tutorial",
+      game: {
+        welcome: {
+          title: "Bem-vindo ao NeverLucky!",
+          message: "Vamos aprender jogando! Você começa com cartas na mão. Clique em uma carta para jogá-la no campo."
+        },
+        mana: {
+          title: "Mana",
+          message: "Cada carta custa mana. Você ganha 1 cristal de mana por turno (até 10). Verifique o custo antes de jogar!"
+        },
+        board: {
+          title: "Campo de Batalha",
+          message: "As unidades são colocadas em duas pistas: Corpo a corpo (esquerda) e À distância (direita). Clique em uma unidade para atacá-la."
+        },
+        heroPower: {
+          title: "Poder do Herói",
+          message: "Cada herói tem poderes únicos! Clique no botão do poder do herói para usá-lo (uma vez por turno)."
+        },
+        endTurn: {
+          title: "Finalizar Turno",
+          message: "Quando terminar suas ações, clique em 'End Turn' para passar o turno. O oponente jogará automaticamente!"
+        }
+      },
       welcome: {
         title: "Bem-vindo ao NeverLucky!",
         content: "Este tutorial irá ensinar os conceitos básicos do jogo. Vamos começar!"
@@ -90,8 +112,30 @@ const translations = {
         content: "Cada turno: Compre uma carta, jogue cartas, use poder de herói, ataque com unidades, então termine o turno. Planeje seus movimentos estrategicamente!"
       },
       strategy: {
-        title: "Estratégia Básica",
-        content: "Controle o campo com unidades corpo a corpo, use unidades à distância para dano seguro, cure com clérigos e use os poderes de herói no momento certo."
+        title: "Basic Strategy",
+        content: "Control the board with melee units, use ranged for safe damage, heal with clerics, and time your hero powers wisely."
+      },
+      dynamic: {
+        card_played: {
+          title: "Card Played!",
+          message: "You placed a unit on the field! It can now attack on the next turn."
+        },
+        attack: {
+          title: "Attack Executed!",
+          message: "Your unit attacked! Each unit can attack only once per turn."
+        },
+        hero_power: {
+          title: "Hero Power Used!",
+          message: "You activated the hero power! It can be used only once per turn."
+        },
+        turn_start: {
+          title: "New Turn!",
+          message: "Your turn has started! You gained mana and a card. Plan your actions!"
+        },
+        heal: {
+          title: "Heal Applied!",
+          message: "Your unit healed an ally! Clerics can heal instead of attacking."
+        }
       }
     },
 
@@ -159,6 +203,28 @@ const translations = {
       next: "Next",
       finish: "Finish",
       skip: "Skip Tutorial",
+      game: {
+        welcome: {
+          title: "Welcome to NeverLucky!",
+          message: "Let's learn by playing! You start with cards in your hand. Click a card to play it on the field."
+        },
+        mana: {
+          title: "Mana",
+          message: "Each card costs mana. You gain 1 mana crystal per turn (up to 10). Check the cost before playing!"
+        },
+        board: {
+          title: "Battlefield",
+          message: "Units are placed in two lanes: Melee (left) and Ranged (right). Click a unit to attack it."
+        },
+        heroPower: {
+          title: "Hero Power",
+          message: "Each hero has unique powers! Click the hero power button to use it (once per turn)."
+        },
+        endTurn: {
+          title: "End Turn",
+          message: "When you finish your actions, click 'End Turn' to pass the turn. The opponent will play automatically!"
+        }
+      },
       welcome: {
         title: "Welcome to NeverLucky!",
         content: "This tutorial will teach you the basic concepts of the game. Let's get started!"
@@ -194,6 +260,28 @@ const translations = {
       strategy: {
         title: "Basic Strategy",
         content: "Control the board with melee units, use ranged for safe damage, heal with clerics, and time your hero powers wisely."
+      },
+      dynamic: {
+        card_played: {
+          title: "Card Played!",
+          message: "You placed a unit on the field! It can now attack on the next turn."
+        },
+        attack: {
+          title: "Attack Executed!",
+          message: "Your unit attacked! Each unit can attack only once per turn."
+        },
+        hero_power: {
+          title: "Hero Power Used!",
+          message: "You activated the hero power! It can be used only once per turn."
+        },
+        turn_start: {
+          title: "New Turn!",
+          message: "Your turn has started! You gained mana and a card. Plan your actions!"
+        },
+        heal: {
+          title: "Heal Applied!",
+          message: "Your unit healed an ally! Clerics can heal instead of attacking."
+        }
       }
     },
 

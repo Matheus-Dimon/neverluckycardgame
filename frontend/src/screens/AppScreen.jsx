@@ -1,5 +1,5 @@
-import React, { useContext } from 'react'
-import { GameProvider, GameContext } from '../context/GameContext'
+import React, { useContext, useEffect } from 'react'
+import { GameContext } from '../context/GameContext'
 import DeckSetup from '../components/DeckSetup'
 import HeroPowerSetup from '../components/HeroPowerSetup'
 import PassiveSkillsSetup from '../components/PassiveSkillsSetup'
@@ -8,8 +8,16 @@ import GlobalErrorCatcher from '../components/GlobalErrorCatcher'
 import BackgroundMusic from '../components/BackgroundMusic'
 import StartMenu from './StartMenu'
 import Board from '../components/Board'
-function InnerApp() {
+
+function InnerApp({ tutorialMode }) {
   const { state, dispatch } = useContext(GameContext)
+
+  // Start tutorial when component mounts in tutorial mode
+  useEffect(() => {
+    if (tutorialMode && state.gamePhase === 'START_MENU') {
+      dispatch({ type: 'START_TUTORIAL' })
+    }
+  }, [tutorialMode, state.gamePhase, dispatch])
 
   if (state.gamePhase === 'START_MENU') {
     return (
@@ -55,13 +63,11 @@ function InnerApp() {
   )
 }
 
-export default function AppScreen() {
+export default function AppScreen({ tutorialMode }) {
   return (
-    <GameProvider>
-      <ErrorBoundary>
-        <InnerApp />
-        <GlobalErrorCatcher />
-      </ErrorBoundary>
-    </GameProvider>
+    <ErrorBoundary>
+      <InnerApp tutorialMode={tutorialMode} />
+      <GlobalErrorCatcher />
+    </ErrorBoundary>
   )
 }

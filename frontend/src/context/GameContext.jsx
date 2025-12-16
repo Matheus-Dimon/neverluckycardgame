@@ -47,6 +47,12 @@ const initialState = {
   animation: { active: false, element: null, startRect: null, endRect: null, callbackAction: null },
   isAITurnProcessing: false,
   soundEnabled: true,
+  gameLog: [],
+  tutorialMode: false,
+  tutorialStep: 0,
+  tutorialHighlights: [],
+  tutorialMessage: null,
+  tutorialMessageTimeout: null,
 }
 
 /* ------------------- AI Selections ------------------- */
@@ -130,10 +136,18 @@ function selectAIPowers() {
 
 /* ------------------- AUXILIARES ------------------- */
 function safeLaneCopy(field = {}) {
-  return { 
-    melee: Array.isArray(field.melee) ? [...field.melee] : [], 
-    ranged: Array.isArray(field.ranged) ? [...field.ranged] : [] 
+  return {
+    melee: Array.isArray(field.melee) ? [...field.melee] : [],
+    ranged: Array.isArray(field.ranged) ? [...field.ranged] : []
   }
+}
+
+function addGameLogEntry(state, entry) {
+  const newLog = [...state.gameLog, {
+    ...entry,
+    timestamp: new Date().toLocaleTimeString()
+  }].slice(-50) // Keep only last 50 entries
+  return { ...state, gameLog: newLog }
 }
 
 function applyDamageToField(field, targetId, dmg, turnCount) {
@@ -196,7 +210,7 @@ function applyCardEffects(state, card, playerKey) {
         opponent.field = safeLaneCopy(opponent.field)
         ;['melee', 'ranged'].forEach(lane => {
           opponent.field[lane] = opponent.field[lane].map(c => ({
-            ...c, 
+            ...c,
             defense: c.defense - effect.value
           })).filter(c => c.defense > 0)
         })
@@ -232,7 +246,7 @@ function applyCardEffects(state, card, playerKey) {
       }
     }
   })
-  
+
   return newState
 }
 
@@ -493,19 +507,19 @@ function reducer(state=initialState, action){
       const player = {...state[playerKey]}
       const index = player.hand.findIndex(c => c.id === cardId)
       if (index === -1) return state
-      
+
       let card = {...player.hand[index]}
-      
+
       // Aplica modificador de custo de passiva
       if (player.passiveSkills?.some(id => id.includes('cheaper_minions'))) {
         card.mana = Math.max(1, card.mana - 1)
       }
-      
+
       if (player.mana < card.mana) return state
-      
+
       player.mana -= card.mana
       player.hand = player.hand.filter(c => c.id !== cardId)
-      
+
       // Aplica buffs de passivas
       if (player.passiveSkills?.some(id => id.includes('hp_boost'))) {
         card.defense += 1
@@ -516,39 +530,61 @@ function reducer(state=initialState, action){
       if (card.type.lane === 'ranged' && player.passiveSkills?.some(id => id.includes('ranged_damage'))) {
         card.attack += 1
       }
-      
+
       // Verifica efeitos da carta
       let canAttack = false
       let immuneFirstTurn = false
-      
+
       if (card.effects) {
         card.effects.forEach(effect => {
           if (effect.effect === 'CHARGE') canAttack = true
           if (effect.effect === 'IMMUNE_FIRST_TURN') immuneFirstTurn = true
         })
       }
-      
+
       // Passiva de charge para melee
       if (card.type.lane === 'melee' && player.passiveSkills?.some(id => id.includes('charge_melee'))) {
         canAttack = true
       }
-      
+
       const lane = card.type.lane
       const field = safeLaneCopy(player.field)
-      
+
       // IMPORTANTE: Immune não dá charge!
       card.canAttack = canAttack
       card.immuneFirstTurn = immuneFirstTurn
       card.turnPlayed = state.turnCount
       card.currentTurn = state.turnCount
-      
+
       field[lane] = [...field[lane], card]
-      
+
       let newState = {...state, [playerKey]: {...player, field}}
-      
+
       // Aplica efeitos battlecry
       newState = applyCardEffects(newState, card, playerKey)
-      
+
+      // Add log entry
+      newState = addGameLogEntry(newState, {
+        type: 'card_played',
+        player: playerKey,
+        card: card,
+        turn: state.turnCount
+      })
+
+      // Tutorial message for first card played
+      if (state.tutorialMode && playerKey === 'player1') {
+        const totalCardsOnField = [...newState.player1.field.melee, ...newState.player1.field.ranged].length
+        if (totalCardsOnField === 1) {
+          newState = {
+            ...newState,
+            tutorialMessage: 'Ótimo! Você jogou sua primeira carta. Agora tente atacar com ela!',
+            tutorialMessageTimeout: Date.now(),
+            tutorialStep: 1,
+            tutorialHighlights: ['mana']
+          }
+        }
+      }
+
       return newState
     }
 
@@ -587,7 +623,28 @@ function reducer(state=initialState, action){
     case 'APPLY_HERO_POWER_WITH_TARGET': {
       const {playerKey, power, targetCardId, targetIsHero} = action.payload
       const newState = applyHeroPowerEffect(state, playerKey, power, targetCardId, targetIsHero)
-      return {...newState, targeting: {active: false, playerUsing: null, power: null, healingActive: false, healerId: null, healAmount: 0}}
+
+      // Add log entry for hero power
+      let finalState = addGameLogEntry({...newState, targeting: {active: false, playerUsing: null, power: null, healingActive: false, healerId: null, healAmount: 0}}, {
+        type: 'hero_power',
+        player: playerKey,
+        effect: power.effect,
+        turn: state.turnCount
+      })
+
+      // Tutorial message for first hero power use
+      if (state.tutorialMode && playerKey === 'player1') {
+        const heroPowerEntries = state.gameLog.filter(entry => entry.type === 'hero_power' && entry.player === 'player1').length
+        if (heroPowerEntries === 0) { // This is the first hero power use
+          finalState = {
+            ...finalState,
+            tutorialMessage: 'Incrível! Você usou seu primeiro Poder do Herói. Ele pode ser usado uma vez por turno!',
+            tutorialMessageTimeout: Date.now()
+          }
+        }
+      }
+
+      return finalState
     }
 
     case 'INITIATE_HEAL_TARGETING': {
@@ -698,10 +755,28 @@ function reducer(state=initialState, action){
           const healValue = attackerCard.healValue || damage
           player.hp = player.hp + healValue // SEM limite (overheal)
           newState = {...newState, [playerKey]: {...player, field: safeLaneCopy(state[playerKey].field)}}
+
+          // Add log entry for healing
+          newState = addGameLogEntry(newState, {
+            type: 'heal',
+            player: playerKey,
+            card: attackerCard,
+            damage: healValue,
+            target: { name: playerKey === 'player1' ? 'Your Hero' : 'Enemy Hero' }
+          })
         } else {
           // Unidade normal ataca herói inimigo
           const opp = applyDamageToHero(state[opponentKey], damage)
           newState = {...newState, [opponentKey]: {...opp, field: safeLaneCopy(state[opponentKey].field)}}
+
+          // Add log entry for attack
+          newState = addGameLogEntry(newState, {
+            type: 'attack',
+            player: playerKey,
+            card: attackerCard,
+            damage: damage,
+            target: { name: opponentKey === 'player1' ? 'Your Hero' : 'Enemy Hero' }
+          })
 
           // Lifesteal
           if (attackerCard?.effects?.some(e => e.effect === 'LIFESTEAL')) {
@@ -738,6 +813,15 @@ function reducer(state=initialState, action){
             })
           })
           newState = {...newState, [playerKey]: {...player}, [opponentKey]: {...opp, field: safeLaneCopy(state[opponentKey].field)}}
+
+          // Add log entry for healing unit
+          newState = addGameLogEntry(newState, {
+            type: 'heal',
+            player: playerKey,
+            card: attackerCard,
+            damage: healValue,
+            target: targetCard
+          })
         }
       } else {
         // Unidade normal ataca minion inimigo
@@ -746,10 +830,28 @@ function reducer(state=initialState, action){
 
         opp.field = applyDamageToField(opp.field, targetId, damage, state.turnCount)
 
+        // Add log entry for attack
+        newState = addGameLogEntry({...newState, [opponentKey]: opp}, {
+          type: 'attack',
+          player: playerKey,
+          card: attackerCard,
+          damage: damage,
+          target: targetCard
+        })
+
         // CONTRA-ATAQUE: Se MELEE atacou MELEE, o atacante recebe dano de volta
         if (attackerCard?.type.lane === 'melee' && targetCard?.type.lane === 'melee') {
           const counterDamage = targetCard.attack || 0
           attacker.field = applyDamageToField(attacker.field, attackerId, counterDamage, state.turnCount)
+
+          // Add log entry for counter attack
+          newState = addGameLogEntry(newState, {
+            type: 'attack',
+            player: opponentKey,
+            card: targetCard,
+            damage: counterDamage,
+            target: attackerCard
+          })
         }
 
         // Lifesteal
@@ -760,6 +862,19 @@ function reducer(state=initialState, action){
         newState = {...newState, [playerKey]: attacker, [opponentKey]: opp}
       }
 
+      // Tutorial message for first attack
+      if (state.tutorialMode && playerKey === 'player1' && !targetIsHero && targetId) {
+        // Check if this is the first attack by counting attack log entries
+        const attackEntries = state.gameLog.filter(entry => entry.type === 'attack' && entry.player === 'player1').length
+        if (attackEntries === 0) { // This is the first attack
+          newState = {
+            ...newState,
+            tutorialMessage: 'Excelente! Você atacou uma unidade inimiga. Ela também ataca de volta!',
+            tutorialMessageTimeout: Date.now()
+          }
+        }
+      }
+
       return newState
     }
 
@@ -768,26 +883,32 @@ function reducer(state=initialState, action){
       const nextKey = nextTurn === 1 ? 'player1' : 'player2'
       const newTurnCount = state.turnCount + 1
       const next = {...state[nextKey], field: safeLaneCopy(state[nextKey].field)}
-      
+
       next.maxMana = Math.min((next.maxMana || 0) + 1, 10)
       next.mana = next.maxMana
       next.hasUsedHeroPower = false
-      
+
       // Atualiza turno atual das cartas
       ;['melee', 'ranged'].forEach(lane => {
         next.field[lane] = next.field[lane].map(c => ({
-          ...c, 
+          ...c,
           canAttack: true,
           currentTurn: newTurnCount
         }))
       })
-      
+
       // Draw automático
       const drawn = next.deck.slice(0, 1).map(c => ({...c, id: `${c.id}_${Date.now()}_${Math.random()}`}))
       next.hand = [...next.hand, ...drawn]
       next.deck = next.deck.slice(1)
-      
-      return {...state, turn: nextTurn, turnCount: newTurnCount, [nextKey]: next}
+
+      // Add log entry for turn change
+      const newState = {...state, turn: nextTurn, turnCount: newTurnCount, [nextKey]: next}
+      return addGameLogEntry(newState, {
+        type: 'turn_start',
+        player: nextKey,
+        turn: newTurnCount
+      })
     }
 
     case 'RESTART_GAME': {
@@ -808,7 +929,124 @@ function reducer(state=initialState, action){
       return {...state, isAITurnProcessing: !!action.payload}
     }
 
-    default: 
+    case 'START_TUTORIAL': {
+      // Start tutorial mode with pre-configured deck and settings
+      // Use actual card IDs from CARD_OPTIONS.P1
+      const tutorialDeck = ['p1_001', 'p1_002', 'p1_003', 'p1_004', 'p1_005'] // Basic warrior, archer, cleric, and two more
+      const tutorialPowers = ['damage', 'heal']
+
+      // Create tutorial deck with specific cards
+      const p1Deck = makeOrderedDeck(CARD_OPTIONS.P1, tutorialDeck)
+
+      let p1 = {
+        ...state.player1,
+        heroPowers: tutorialPowers.map(powerId => {
+          const power = HERO_POWER_OPTIONS.P1.find(p => p.id === powerId)
+          return {...power}
+        }),
+        deck: p1Deck,
+        passiveSkills: [],
+        hand: [],
+      }
+
+      // Simple AI for tutorial - multiple weak units to play continuously
+      const aiDeck = ['p2_001', 'p2_001', 'p2_001', 'p2_001', 'p2_001'] // Multiple skeletons
+      const p2Deck = makeOrderedDeck(CARD_OPTIONS.P2, aiDeck)
+
+      let p2 = {
+        ...state.player2,
+        heroPowers: [{name: 'Tutorial', effect: 'damage', cost: 10, amount: 1}], // High cost to prevent use
+        deck: p2Deck,
+        passiveSkills: [],
+        hand: [],
+        hp: 10, // Easier to defeat
+      }
+
+      // Apply passive effects (none for tutorial)
+      p1 = applyPassiveEffects(p1, [])
+      p2 = applyPassiveEffects(p2, [])
+
+      const draw = (p, n) => {
+        const drawn = p.deck.slice(0, n).map(c => ({...c, id: `${c.id}_${Date.now()}_${Math.random()}`}))
+        p.hand = [...p.hand, ...drawn]
+        p.deck = p.deck.slice(n)
+      }
+
+      draw(p1, 3) // Tutorial starts with 3 cards
+      draw(p2, 1)
+
+      return {
+        ...state,
+        player1: p1,
+        player2: p2,
+        gamePhase: 'PLAYING',
+        turn: 2, // AI starts first in tutorial
+        turnCount: 1,
+        tutorialMode: true,
+        tutorialStep: 0,
+        tutorialHighlights: ['hand']
+      }
+    }
+
+    case 'ADVANCE_TUTORIAL': {
+      const newStep = state.tutorialStep + 1
+      let highlights = []
+
+      // Define highlights based on tutorial step
+      switch (newStep) {
+        case 1:
+          highlights = ['mana']
+          break
+        case 2:
+          highlights = ['hand']
+          break
+        case 3:
+          highlights = ['board']
+          break
+        case 4:
+          highlights = ['hero-power']
+          break
+        case 5:
+          highlights = ['end-turn']
+          break
+        default:
+          highlights = []
+      }
+
+      return {
+        ...state,
+        tutorialStep: newStep,
+        tutorialHighlights: highlights
+      }
+    }
+
+    case 'SET_TUTORIAL_MESSAGE': {
+      const { message, duration = 5000 } = action.payload
+      if (state.tutorialMessageTimeout) {
+        clearTimeout(state.tutorialMessageTimeout)
+      }
+      const timeout = setTimeout(() => {
+        dispatch({ type: 'CLEAR_TUTORIAL_MESSAGE' })
+      }, duration)
+      return {
+        ...state,
+        tutorialMessage: message,
+        tutorialMessageTimeout: timeout
+      }
+    }
+
+    case 'CLEAR_TUTORIAL_MESSAGE': {
+      if (state.tutorialMessageTimeout) {
+        clearTimeout(state.tutorialMessageTimeout)
+      }
+      return {
+        ...state,
+        tutorialMessage: null,
+        tutorialMessageTimeout: null
+      }
+    }
+
+    default:
       return state
   }
 }
@@ -817,6 +1055,16 @@ export function GameProvider({children}){
   const [state, dispatch] = useReducer(reducer, initialState)
   const stateRef = useRef(state)
   stateRef.current = state
+
+  // Handle tutorial message timeout
+  useEffect(() => {
+    if (state.tutorialMessageTimeout) {
+      const timer = setTimeout(() => {
+        dispatch({ type: 'CLEAR_TUTORIAL_MESSAGE' })
+      }, 5000)
+      return () => clearTimeout(timer)
+    }
+  }, [state.tutorialMessageTimeout])
 
   useEffect(() => {
     if (state.turn !== 2 || state.gamePhase !== 'PLAYING' || state.isAITurnProcessing || state.gameOver) return
@@ -831,6 +1079,57 @@ export function GameProvider({children}){
 
       let mana = stateRef.current.player2.mana
       const aiPlayer = state.player2
+
+      // Special AI for tutorial mode - play continuously like normal AI but simplified
+      if (state.tutorialMode) {
+        // Use early game AI logic for tutorial: play multiple cards and attack with all units
+        let remainingMana = mana
+        const handCopy = [...state.player2.hand]
+        while (remainingMana > 0) {
+          const currentPlayable = handCopy.filter(c => c.mana <= remainingMana)
+            .sort((a, b) => a.mana - b.mana) // Play lowest cost first
+
+          if (currentPlayable.length === 0) break
+
+          const card = currentPlayable[0]
+          dispatch({type: 'PLAY_CARD', payload: {cardId: card.id, playerKey: 'player2'}})
+          remainingMana -= card.mana
+          const index = handCopy.findIndex(c => c.id === card.id)
+          handCopy.splice(index, 1)
+          await delay(800)
+          if (cancelled) return
+        }
+
+        // Attack with all units
+        const currentState = stateRef.current
+        const attackerUnits = [...currentState.player2.field.melee, ...currentState.player2.field.ranged].filter(c => c.canAttack)
+        const opponent = currentState.player1
+
+        for (const attacker of attackerUnits) {
+          if (cancelled) return
+
+          // Simple targeting: attack hero if no minions, otherwise attack first minion
+          const enemyMinions = [...opponent.field.melee, ...opponent.field.ranged]
+          let targetId = null
+          let targetIsHero = false
+
+          if (enemyMinions.length > 0) {
+            targetId = enemyMinions[0].id
+          } else {
+            targetIsHero = true
+          }
+
+          dispatch({
+            type: 'APPLY_ATTACK_DAMAGE',
+            payload: { attackerId: attacker.id, targetId, targetIsHero, damage: attacker.attack, playerKey: 'player2' }
+          })
+          await delay(500)
+        }
+
+        // End turn
+        dispatch({type: 'END_TURN'})
+        return
+      }
 
       // Early Game AI: For turns 1-3, prioritize only cost 1 and 2 cards
       if (state.turnCount <= 3) {
@@ -1060,7 +1359,7 @@ export function GameProvider({children}){
           // For clerics, targets are own minions to heal, sorted by lowest HP first
           possibleTargets = [...aiField.melee, ...aiField.ranged].sort((a, b) => a.defense - b.defense)
         } else {
-          // For attackers, target enemies
+          // For attackers, targets are enemies
           const allEnemyMinions = [...opponent.field.melee, ...opponent.field.ranged]
 
           // Check for taunts first

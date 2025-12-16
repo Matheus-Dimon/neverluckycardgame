@@ -3,12 +3,14 @@ import HomePage from './screens/HomePage';
 import LoginPage from './screens/LoginPage';
 import RegisterPage from './screens/RegisterPage';
 import AppScreen from './screens/AppScreen';
+import { GameProvider } from './context/GameContext';
 import './styles/styles.css';
 
 const App = () => {
   const [currentScreen, setCurrentScreen] = useState('home');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [tutorialMode, setTutorialMode] = useState(false);
 
   // Temporarily disabled auto-login to show auth pages
   // useEffect(() => {
@@ -41,12 +43,22 @@ const App = () => {
     localStorage.removeItem('currentUser');
     setCurrentUser(null);
     setIsLoggedIn(false);
+    setTutorialMode(false);
     setCurrentScreen('home');
   };
 
-  // If user is logged in, show the game
-  if (isLoggedIn && currentScreen === 'game') {
-    return <AppScreen onLogout={handleLogout} currentUser={currentUser} />;
+  const startTutorial = () => {
+    setTutorialMode(true);
+    setCurrentScreen('game');
+  };
+
+  // If user is logged in or in tutorial mode, show the game
+  if ((isLoggedIn || tutorialMode) && currentScreen === 'game') {
+    return (
+      <GameProvider>
+        <AppScreen onLogout={handleLogout} currentUser={currentUser} tutorialMode={tutorialMode} />
+      </GameProvider>
+    );
   }
 
   // Authentication flow
@@ -72,6 +84,7 @@ const App = () => {
         <HomePage
           onNavigateToLogin={navigateToLogin}
           onNavigateToRegister={navigateToRegister}
+          onStartTutorial={startTutorial}
         />
       );
   }

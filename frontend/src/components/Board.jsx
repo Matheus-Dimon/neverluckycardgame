@@ -8,6 +8,8 @@ import GameOverModal from './GameOverModal.jsx'
 import InstructionsPanel from './InstructionsPanel.jsx'
 import GameLog from './GameLog.jsx'
 import AnimationLayer from './AnimationLayer.jsx'
+import TutorialOverlay from './TutorialOverlay.jsx'
+import DynamicTutorialMessages from './DynamicTutorialMessages.jsx'
 import { HERO_IMAGES, HERO_PASSIVE_OPTIONS } from '../utils/constants.js'
 
 // Sistema de sons MELHORADO
@@ -242,7 +244,7 @@ const playSound = (type) => {
 
 export default function Board() {
   const { state, dispatch } = useContext(GameContext)
-  const { player1, player2, turn, animation, targeting, gameOver, winner } = state
+  const { player1, player2, turn, animation, targeting, gameOver, winner, gameLog, tutorialMode, tutorialStep, tutorialHighlights, tutorialMessage } = state
 
   const playCard = (card) => {
     if (turn !== 1) return
@@ -697,6 +699,16 @@ export default function Board() {
     }
   }, [gameOver, winner])
 
+  // Tutorial event listener
+  React.useEffect(() => {
+    const handleAdvanceTutorial = () => {
+      dispatch({ type: 'ADVANCE_TUTORIAL' })
+    }
+
+    window.addEventListener('advanceTutorial', handleAdvanceTutorial)
+    return () => window.removeEventListener('advanceTutorial', handleAdvanceTutorial)
+  }, [dispatch])
+
   return (
     <div className="board-container">
       <div className="board-root">
@@ -853,7 +865,17 @@ export default function Board() {
     </div>
 
     <InstructionsPanel />
-    <GameLog log={[]} />
+    <GameLog log={gameLog} />
+
+    {tutorialMode && (
+      <TutorialOverlay
+        tutorialStep={tutorialStep}
+        tutorialHighlights={tutorialHighlights}
+        tutorialMessage={tutorialMessage}
+      />
+    )}
+
+    <DynamicTutorialMessages />
   </div>
   )
 }

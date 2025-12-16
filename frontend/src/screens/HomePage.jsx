@@ -3,7 +3,7 @@ import { useLanguage } from '../context/LanguageContext';
 import InteractiveTutorial from '../components/InteractiveTutorial';
 import '../styles/styles.css';
 
-const HomePage = ({ onNavigateToLogin, onNavigateToRegister }) => {
+const HomePage = ({ onNavigateToLogin, onNavigateToRegister, onStartTutorial }) => {
   const { language, switchLanguage, t } = useLanguage();
   const [showTutorial, setShowTutorial] = useState(false);
 
@@ -51,7 +51,7 @@ const HomePage = ({ onNavigateToLogin, onNavigateToRegister }) => {
         <div style={{ marginTop: '30px', textAlign: 'center' }}>
           <button
             className="homepage-button"
-            onClick={() => setShowTutorial(true)}
+            onClick={onStartTutorial}
             style={{
               padding: '12px 30px',
               background: 'linear-gradient(135deg, #8b5a2b, #a67c52)',
