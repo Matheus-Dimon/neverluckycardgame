@@ -9,7 +9,7 @@ import BackgroundMusic from '../components/BackgroundMusic'
 import StartMenu from './StartMenu'
 import Board from '../components/Board'
 
-function InnerApp({ tutorialMode }) {
+function InnerApp({ tutorialMode, onLogout }) {
   const { state, dispatch } = useContext(GameContext)
 
   // Start tutorial when component mounts in tutorial mode
@@ -57,16 +57,16 @@ function InnerApp({ tutorialMode }) {
 
   return (
     <>
-      <Board />
+      <Board onLogout={onLogout} />
       <BackgroundMusic />
     </>
   )
 }
 
-export default function AppScreen({ tutorialMode }) {
+export default function AppScreen({ tutorialMode, onLogout }) {
   return (
     <ErrorBoundary>
-      <InnerApp tutorialMode={tutorialMode} />
+      <InnerApp tutorialMode={tutorialMode} onLogout={onLogout} />
       <GlobalErrorCatcher />
     </ErrorBoundary>
   )

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react'
 import { useLanguage } from '../context/LanguageContext'
 import { GameContext } from '../context/GameContext.jsx'
 
-export default function ImmersiveTutorial({ isOpen, onClose, onAdvanceTutorial, tutorialStep, tutorialHighlights, tutorialMessage }) {
+export default function ImmersiveTutorial({ isOpen, onClose, onAdvanceTutorial, onFinishTutorial, tutorialStep, tutorialHighlights, tutorialMessage }) {
   const { t } = useLanguage()
   const { state, dispatch } = useContext(GameContext)
   const [currentStep, setCurrentStep] = useState(0)
@@ -577,8 +577,8 @@ export default function ImmersiveTutorial({ isOpen, onClose, onAdvanceTutorial, 
           {step.id === 'tutorial_complete' && state.player2.hp <= 0 && (
             <button
               onClick={() => {
-                // Dispatch action to go to login page
-                dispatch({ type: 'GO_TO_LOGIN' })
+                // Go back to login/registration screen
+                onFinishTutorial && onFinishTutorial()
                 onClose && onClose()
               }}
               style={{

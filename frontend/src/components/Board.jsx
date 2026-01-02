@@ -243,7 +243,7 @@ const playSound = (type) => {
   }
 }
 
-export default function Board() {
+export default function Board({ onLogout }) {
   const { state, dispatch } = useContext(GameContext)
   const { language, switchLanguage, t } = useLanguage()
   const { player1, player2, turn, animation, targeting, gameOver, winner, gameLog, tutorialMode, tutorialStep, tutorialHighlights, tutorialMessage } = state
@@ -981,6 +981,7 @@ export default function Board() {
         isOpen={tutorialMode}
         onClose={() => dispatch({ type: 'CLEAR_TUTORIAL_MESSAGE' })}
         onAdvanceTutorial={(step) => dispatch({ type: 'ADVANCE_TUTORIAL' })}
+        onFinishTutorial={onLogout}
         tutorialStep={tutorialStep}
         tutorialHighlights={tutorialHighlights}
         tutorialMessage={tutorialMessage}
