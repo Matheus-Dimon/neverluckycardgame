@@ -22,10 +22,26 @@ public class GameController {
 
     @PostMapping("/invite-friend")
     public ResponseEntity<GameDTO> inviteFriend(@RequestParam Long player1Id, @RequestParam Long friendId) {
-        // Verify they are friends (this would be checked in service)
-        GameDTO game = gameService.createGame(player1Id);
-        // Here you could store the invitation or notify the friend
+        GameDTO game = gameService.inviteFriend(player1Id, friendId);
         return ResponseEntity.ok(game);
+    }
+
+    @PostMapping("/{gameId}/accept-invite")
+    public ResponseEntity<GameDTO> acceptInvite(@PathVariable Long gameId, @RequestParam Long player2Id) {
+        GameDTO game = gameService.acceptInvite(gameId, player2Id);
+        return ResponseEntity.ok(game);
+    }
+
+    @PostMapping("/{gameId}/decline-invite")
+    public ResponseEntity<GameDTO> declineInvite(@PathVariable Long gameId, @RequestParam Long playerId) {
+        GameDTO game = gameService.declineInvite(gameId, playerId);
+        return ResponseEntity.ok(game);
+    }
+
+    @GetMapping("/pending-invites/{userId}")
+    public ResponseEntity<java.util.List<GameDTO>> getPendingInvites(@PathVariable Long userId) {
+        java.util.List<GameDTO> invites = gameService.getPendingInvites(userId);
+        return ResponseEntity.ok(invites);
     }
 
     @GetMapping("/{gameId}")

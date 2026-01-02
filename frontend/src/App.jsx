@@ -4,6 +4,7 @@ import LoginPage from './screens/LoginPage';
 import RegisterPage from './screens/RegisterPage';
 import AppScreen from './screens/AppScreen';
 import { GameProvider } from './context/GameContext';
+import { authAPI } from './utils/api';
 import './styles/styles.css';
 
 const App = () => {
@@ -39,7 +40,15 @@ const App = () => {
     setCurrentScreen('game');
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      if (currentUser.username) {
+        await authAPI.logout(currentUser.username);
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
     localStorage.removeItem('currentUser');
     setCurrentUser(null);
     setIsLoggedIn(false);

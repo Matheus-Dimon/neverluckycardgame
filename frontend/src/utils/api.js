@@ -35,6 +35,10 @@ export const authAPI = {
   register: (username, password) => apiRequest('/auth/register', {
     method: 'POST',
     body: JSON.stringify({ username, password })
+  }),
+  logout: (username) => apiRequest('/auth/logout', {
+    method: 'POST',
+    body: JSON.stringify({ username })
   })
 };
 
@@ -55,6 +59,27 @@ export const friendAPI = {
   getSentRequests: () => apiRequest('/friends/requests/sent'),
 
   removeFriend: (friendId) => apiRequest(`/friends/remove/${friendId}`, { method: 'DELETE' }),
+};
+
+// Game-related API calls
+export const gameAPI = {
+  inviteFriend: (player1Id, friendId) => apiRequest(`/game/invite-friend?player1Id=${player1Id}&friendId=${friendId}`, {
+    method: 'POST'
+  }),
+
+  acceptInvite: (gameId, player2Id) => apiRequest(`/game/${gameId}/accept-invite?player2Id=${player2Id}`, {
+    method: 'POST'
+  }),
+
+  declineInvite: (gameId, playerId) => apiRequest(`/game/${gameId}/decline-invite?playerId=${playerId}`, {
+    method: 'POST'
+  }),
+
+  getPendingInvites: (userId) => apiRequest(`/game/pending-invites/${userId}`),
+
+  getGame: (gameId) => apiRequest(`/game/${gameId}`),
+
+  startGame: (gameId) => apiRequest(`/game/${gameId}/start`, { method: 'POST' }),
 };
 
 export default apiRequest;

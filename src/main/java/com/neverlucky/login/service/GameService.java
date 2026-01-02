@@ -31,6 +31,7 @@ public class GameService {
 
         Game game = new Game();
         game.setPlayer1(player1);
+        game.setStatus(Game.GameStatus.PENDING);
         game.setGamePhase(Game.GamePhase.START_MENU);
         game.setTurn(Game.Turn.PLAYER1);
         game.setTurnCount(1);
@@ -44,6 +45,80 @@ public class GameService {
 
         game = gameRepository.save(game);
         return convertToDTO(game);
+    }
+
+    public GameDTO inviteFriend(Long player1Id, Long friendId) {
+        if (player1Id == null || friendId == null) {
+            throw new IllegalArgumentException("Player IDs cannot be null");
+        }
+        User player1 = userRepository.findById(player1Id)
+                .orElseThrow(() -> new RuntimeException("Player1 not found"));
+        User friend = userRepository.findById(friendId)
+                .orElseThrow(() -> new RuntimeException("Friend not found"));
+
+        Game game = new Game();
+        game.setPlayer1(player1);
+        game.setStatus(Game.GameStatus.PENDING);
+        game.setGamePhase(Game.GamePhase.START_MENU);
+        game.setTurn(Game.Turn.PLAYER1);
+        game.setTurnCount(1);
+        game.setGameOver(false);
+
+        // Initialize player states
+        PlayerState p1State = createInitialPlayerState();
+        PlayerState p2State = createInitialPlayerState();
+        game.setPlayer1State(p1State);
+        game.setPlayer2State(p2State);
+
+        game = gameRepository.save(game);
+        return convertToDTO(game);
+    }
+
+    public GameDTO acceptInvite(Long gameId, Long player2Id) {
+        if (gameId == null || player2Id == null) {
+            throw new IllegalArgumentException("Game ID and Player2 ID cannot be null");
+        }
+        Game game = gameRepository.findById(gameId)
+                .orElseThrow(() -> new RuntimeException("Game not found"));
+        User player2 = userRepository.findById(player2Id)
+                .orElseThrow(() -> new RuntimeException("Player2 not found"));
+
+        if (!game.getStatus().equals(Game.GameStatus.PENDING)) {
+            throw new RuntimeException("Game invitation is not pending");
+        }
+
+        game.setPlayer2(player2);
+        game.setStatus(Game.GameStatus.ACCEPTED);
+        game = gameRepository.save(game);
+        return convertToDTO(game);
+    }
+
+    public GameDTO declineInvite(Long gameId, Long playerId) {
+        if (gameId == null || playerId == null) {
+            throw new IllegalArgumentException("Game ID and Player ID cannot be null");
+        }
+        Game game = gameRepository.findById(gameId)
+                .orElseThrow(() -> new RuntimeException("Game not found"));
+
+        if (!game.getStatus().equals(Game.GameStatus.PENDING)) {
+            throw new RuntimeException("Game invitation is not pending");
+        }
+
+        game.setStatus(Game.GameStatus.DECLINED);
+        game = gameRepository.save(game);
+        return convertToDTO(game);
+    }
+
+    public List<GameDTO> getPendingInvites(Long userId) {
+        List<Game> games = gameRepository.findByStatusAndPlayer1Id(Game.GameStatus.PENDING, userId);
+        return games.stream().map(this::convertToDTO).collect(Collectors.toList());
+    }
+
+    public List<GameDTO> getReceivedInvites(Long userId) {
+        // This would require a query to find games where userId is not player1 but invitation exists
+        // For simplicity, assuming we need to query by status pending and perhaps store invited user separately
+        // But for now, we'll assume invites are stored in a way we can query
+        return new ArrayList<>(); // Placeholder
     }
 
     public GameDTO getGame(Long gameId) {

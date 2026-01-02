@@ -18,6 +18,8 @@ public class User {
 
     private String password;
 
+    private boolean isOnline = false;
+
     public Long getId() {
         return id;
     }
@@ -40,5 +42,13 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public boolean isOnline() {
+        return isOnline;
+    }
+
+    public void setOnline(boolean online) {
+        isOnline = online;
     }
 }

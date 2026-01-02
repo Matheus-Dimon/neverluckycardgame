@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
-import { friendAPI } from '../utils/api';
+import { friendAPI, gameAPI } from '../utils/api';
 import '../styles/styles.css';
 
 const FriendsPage = ({ onBack }) => {
@@ -8,6 +8,7 @@ const FriendsPage = ({ onBack }) => {
   const [friends, setFriends] = useState([]);
   const [pendingRequests, setPendingRequests] = useState([]);
   const [sentRequests, setSentRequests] = useState([]);
+  const [gameInvites, setGameInvites] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -21,14 +22,18 @@ const FriendsPage = ({ onBack }) => {
   const loadFriendsData = async () => {
     try {
       setLoading(true);
-      const [friendsData, pendingData, sentData] = await Promise.all([
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      const userId = currentUser.id;
+      const [friendsData, pendingData, sentData, invitesData] = await Promise.all([
         friendAPI.getFriends(),
         friendAPI.getPendingRequests(),
-        friendAPI.getSentRequests()
+        friendAPI.getSentRequests(),
+        userId ? gameAPI.getPendingInvites(userId) : Promise.resolve([])
       ]);
       setFriends(friendsData);
       setPendingRequests(pendingData);
       setSentRequests(sentData);
+      setGameInvites(invitesData);
     } catch (err) {
       setError('Failed to load friends data');
       console.error(err);
@@ -92,9 +97,52 @@ const FriendsPage = ({ onBack }) => {
     }
   };
 
-  const handleInviteFriend = (friendId) => {
-    // TODO: Implement game invitation
-    setError('Game invitation not implemented yet');
+  const handleInviteFriend = async (friendId) => {
+    try {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      const userId = currentUser.id;
+      if (!userId) {
+        setError('User not logged in');
+        return;
+      }
+      await gameAPI.inviteFriend(userId, friendId);
+      setSuccess('Game invitation sent successfully!');
+      loadFriendsData(); // Refresh data
+    } catch (err) {
+      setError('Failed to send game invitation: ' + err.message);
+    }
+  };
+
+  const handleAcceptGameInvite = async (gameId) => {
+    try {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      const userId = currentUser.id;
+      if (!userId) {
+        setError('User not logged in');
+        return;
+      }
+      await gameAPI.acceptInvite(gameId, userId);
+      setSuccess('Game invitation accepted! Starting game...');
+      loadFriendsData(); // Refresh data
+    } catch (err) {
+      setError('Failed to accept game invitation: ' + err.message);
+    }
+  };
+
+  const handleDeclineGameInvite = async (gameId) => {
+    try {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      const userId = currentUser.id;
+      if (!userId) {
+        setError('User not logged in');
+        return;
+      }
+      await gameAPI.declineInvite(gameId, userId);
+      setSuccess('Game invitation declined.');
+      loadFriendsData(); // Refresh data
+    } catch (err) {
+      setError('Failed to decline game invitation: ' + err.message);
+    }
   };
 
   const clearMessages = () => {
@@ -258,6 +306,58 @@ const FriendsPage = ({ onBack }) => {
           </div>
         )}
 
+        {gameInvites.length > 0 && (
+          <div className="game-invites">
+            <h3>Convites para Jogar ({gameInvites.length})</h3>
+            <div className="invites-list">
+              {gameInvites.map(invite => (
+                <div key={invite.id} className="invite-card" style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '10px',
+                  background: 'rgba(255,255,255,0.9)',
+                  borderRadius: '4px',
+                  marginBottom: '8px'
+                }}>
+                  <span>Convite de {invite.player1?.username || 'Jogador'}</span>
+                  <div>
+                    <button
+                      onClick={() => handleAcceptGameInvite(invite.id)}
+                      style={{
+                        padding: '6px 12px',
+                        background: '#4CAF50',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        marginRight: '8px'
+                      }}
+                    >
+                      Aceitar
+                    </button>
+                    <button
+                      onClick={() => handleDeclineGameInvite(invite.id)}
+                      style={{
+                        padding: '6px 12px',
+                        background: '#f44336',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontSize: '14px'
+                      }}
+                    >
+                      Rejeitar
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="friends-list">
           <h3>Lista de Amigos ({friends.length})</h3>
           {loading ? (
@@ -275,12 +375,12 @@ const FriendsPage = ({ onBack }) => {
                     <div
                       className="friend-status"
                       style={{
-                        color: '#757575',
+                        color: friend.isOnline ? '#4CAF50' : '#757575',
                         fontSize: '14px',
                         fontWeight: 'bold'
                       }}
                     >
-                      ● Offline
+                      ● {friend.isOnline ? 'Online' : 'Offline'}
                     </div>
                   </div>
                   <div className="friend-actions">
@@ -289,16 +389,16 @@ const FriendsPage = ({ onBack }) => {
                       onClick={() => handleInviteFriend(friend.id)}
                       style={{
                         padding: '6px 12px',
-                        background: '#666',
+                        background: '#2196F3',
                         color: 'white',
                         border: 'none',
                         borderRadius: '4px',
-                        cursor: 'not-allowed',
+                        cursor: 'pointer',
                         fontSize: '14px',
                         marginRight: '8px'
                       }}
                     >
-                      Convidar (Em breve)
+                      Convidar para Jogar
                     </button>
                     <button
                       className="remove-button"

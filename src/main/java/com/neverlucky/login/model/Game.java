@@ -20,6 +20,13 @@ public class Game {
     @JoinColumn(name = "player2_id")
     private User player2;
 
+    @ManyToOne
+    @JoinColumn(name = "invited_user_id")
+    private User invitedUser;
+
+    @Enumerated(EnumType.STRING)
+    private GameStatus status;
+
     @Enumerated(EnumType.STRING)
     private GamePhase gamePhase;
 
@@ -50,6 +57,10 @@ public class Game {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    public enum GameStatus {
+        PENDING, ACCEPTED, DECLINED, ACTIVE, FINISHED
     }
 
     public enum GamePhase {

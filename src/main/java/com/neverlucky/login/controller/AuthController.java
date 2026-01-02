@@ -33,6 +33,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User user) {
         if (userService.authenticate(user.getUsername(), user.getPassword())) {
+            userService.setOnlineStatus(user.getUsername(), true);
             String token = jwtUtil.generateToken(user.getUsername());
             Map<String, String> response = new HashMap<>();
             response.put("token", token);
@@ -40,6 +41,17 @@ public class AuthController {
             return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.badRequest().body("Invalid credentials");
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestBody Map<String, String> request) {
+        String username = request.get("username");
+        if (username != null) {
+            userService.logout(username);
+            return ResponseEntity.ok("Logged out successfully");
+        } else {
+            return ResponseEntity.badRequest().body("Username required");
         }
     }
 }

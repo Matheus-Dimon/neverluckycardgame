@@ -37,6 +37,18 @@ public class UserService implements UserDetailsService {
         return user != null && passwordEncoder.matches(password, user.getPassword());
     }
 
+    public void setOnlineStatus(String username, boolean online) {
+        User user = findByUsername(username);
+        if (user != null) {
+            user.setOnline(online);
+            userRepository.save(user);
+        }
+    }
+
+    public void logout(String username) {
+        setOnlineStatus(username, false);
+    }
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = findByUsername(username);
