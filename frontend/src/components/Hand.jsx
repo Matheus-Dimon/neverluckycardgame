@@ -53,9 +53,9 @@ export default function Hand({ cards = [], onPlayCard, playerMana }) {
   const isCardEnabled = (index) => {
     if (!tutorialMode) return true
 
-    // During card selection step (step 1), only allow the first card
+    // During card selection step (step 1), allow all cards
     if (tutorialStep === 1) {
-      return index === 0
+      return true
     }
 
     // During other steps, disable all cards unless specifically allowed

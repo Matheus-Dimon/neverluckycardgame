@@ -579,18 +579,6 @@ function reducer(state=initialState, action){
         turn: state.turnCount
       })
 
-      // Tutorial advancement for card played
-      if (state.tutorialMode && playerKey === 'player1') {
-        if (state.tutorialStep === 1) { // play_card step - player played card
-          // Advance to target_selection step
-          newState = {
-            ...newState,
-            tutorialStep: 2, // Advance to target_selection
-            tutorialHighlights: ['enemy-target']
-          }
-        }
-      }
-
       return newState
     }
 
@@ -944,7 +932,29 @@ function reducer(state=initialState, action){
 
     case 'START_TUTORIAL': {
       // Start mandatory step-by-step tutorial mode
-      const tutorialDeck = ['p1_001', 'p1_002'] // Just warrior and archer for tutorial
+      // Tutorial deck with proper mana curve: 15 cards for educational gameplay
+      const tutorialDeck = [
+        // Early Game (Mana 1-3): 7 cards - Focus on basics and positioning
+        'p1_001', // Escudeiro (1) - Taunt demonstration
+        'p1_002', // Arqueiro Novato (1) - AoE demonstration
+        'p1_003', // Acólito (1) - Healing demonstration
+        'p1_004', // Lanceiro (2) - Charge demonstration
+        'p1_005', // Besteiro (2) - Lifesteal demonstration
+        'p1_006', // Cavaleiro (3) - Strong early game
+        'p1_007', // Guardião (3) - Taunt positioning
+
+        // Mid Game (Mana 4-6): 6 cards - Strategic depth
+        'p1_010', // Paladino (4) - Immune first turn
+        'p1_011', // Caçador (4) - Mid game damage
+        'p1_012', // Sacerdote (4) - Mid game healing
+        'p1_013', // Capitão (5) - Buff allies
+        'p1_014', // Mago de Guerra (5) - Deathrattle
+        'p1_016', // Campeão (6) - Mid game beater
+
+        // Late Game (Mana 7+): 2 cards - Finishers (kept low for tutorial pacing)
+        'p1_019', // General (7) - Late game tank
+        'p1_023'  // Dragão (8) - Late game AoE
+      ]
       const tutorialPowers = ['damage']
 
       const p1Deck = makeOrderedDeck(CARD_OPTIONS.P1, tutorialDeck)
@@ -1029,7 +1039,7 @@ function reducer(state=initialState, action){
         tutorialMode: true,
         tutorialStep: 0,
         tutorialHighlights: ['hand', 'battlefield', 'hero', 'mana'],
-        tutorialUILock: { enabledElements: [], disabledElements: ['all'] }
+        tutorialUILock: { enabledElements: ['hand', 'board', 'mana'], disabledElements: [] }
       }
     }
 

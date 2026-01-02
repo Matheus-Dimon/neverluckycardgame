@@ -349,6 +349,12 @@ export default function Board() {
 
     if (!state.selectedCardId) {
       dispatch({ type: 'SELECT_ATTACKER', payload: { cardId: card.id } })
+
+      // Tutorial advancement: advance from play_card step when player selects attacker
+      if (tutorialMode && tutorialStep === 1) {
+        dispatch({ type: 'ADVANCE_TUTORIAL' })
+      }
+
       return
     }
 
@@ -743,11 +749,8 @@ export default function Board() {
 
     const checkTutorialProgression = () => {
       switch (tutorialStep) {
-        case 1: // Play Card - advance when a card is played
-          if (player1.field.melee.length > 0 || player1.field.ranged.length > 0) {
-            // Card has been played, advance to target selection step
-            setTimeout(() => dispatch({ type: 'ADVANCE_TUTORIAL' }), 1000)
-          }
+        case 1: // Play Card - advance when player selects a card to attack
+          // Advancement handled when player selects attacker
           break
         case 2: // Target Selection - advance when player performs targeting action
           // Advancement handled by player actions in GameContext
@@ -770,10 +773,10 @@ export default function Board() {
       dispatch({ type: 'ADVANCE_TUTORIAL' })
     }
 
-  const handleFinishTutorial = () => {
-    // Return to login screen when tutorial finishes
-    dispatch({ type: 'GO_TO_LOGIN' })
-  }
+    const handleFinishTutorial = () => {
+      // Return to login screen when tutorial finishes
+      dispatch({ type: 'GO_TO_LOGIN' })
+    }
 
     window.addEventListener('advanceTutorial', handleAdvanceTutorial)
     window.addEventListener('finishTutorial', handleFinishTutorial)
