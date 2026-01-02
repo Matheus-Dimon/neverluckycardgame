@@ -246,6 +246,44 @@ export default function Board() {
   const { state, dispatch } = useContext(GameContext)
   const { player1, player2, turn, animation, targeting, gameOver, winner, gameLog, tutorialMode, tutorialStep, tutorialHighlights, tutorialMessage } = state
 
+  // Apply tutorial highlight classes
+  const getTutorialHighlightClass = (elementType) => {
+    if (!tutorialMode || !tutorialHighlights.includes(elementType)) return ''
+    return `tutorial-highlight-${elementType}`
+  }
+
+  // Check if element is enabled during tutorial
+  const isTutorialElementEnabled = (elementType) => {
+    if (!tutorialMode) return true
+
+    // Get current step's UI lock settings
+    const tutorialSteps = [
+      { uiLock: { enabledElements: [], disabledElements: ['all'] } }, // 0: interface_overview
+      { uiLock: { enabledElements: ['tutorial-card-0', 'battlefield-placement'], disabledElements: ['hero', 'end-turn', 'other-cards'] } }, // 1: play_card
+      { uiLock: { enabledElements: ['enemy-target'], disabledElements: ['hand', 'hero', 'end-turn', 'own-units'] } }, // 2: target_selection
+      { uiLock: { enabledElements: ['end-turn'], disabledElements: ['hand', 'battlefield', 'hero'] } }, // 3: turn_flow
+      { uiLock: { enabledElements: ['own-unit-attack', 'enemy-target'], disabledElements: ['hand', 'hero', 'end-turn'] } }, // 4: attacking
+      { uiLock: { enabledElements: [], disabledElements: ['all'] } } // 5: reinforcement_attack
+    ]
+
+    const currentStep = tutorialSteps[tutorialStep]
+    if (!currentStep || !currentStep.uiLock) return true
+
+    const { enabledElements, disabledElements } = currentStep.uiLock
+
+    // If 'all' is disabled, only allow specifically enabled elements
+    if (disabledElements.includes('all')) {
+      return enabledElements.includes(elementType)
+    }
+
+    // If element is explicitly disabled, block it
+    if (disabledElements.includes(elementType)) {
+      return false
+    }
+
+    return true
+  }
+
   const playCard = (card) => {
     if (turn !== 1) return
     playSound('cardPlaySynth')
@@ -699,20 +737,56 @@ export default function Board() {
     }
   }, [gameOver, winner])
 
-  // Tutorial event listener
+  // Tutorial progression based on real user actions
   React.useEffect(() => {
+    if (!tutorialMode) return
+
+    const checkTutorialProgression = () => {
+      switch (tutorialStep) {
+        case 1: // Play Card - advance when a card is played
+          if (player1.field.melee.length > 0 || player1.field.ranged.length > 0) {
+            // Card has been played, advance to target selection step
+            setTimeout(() => dispatch({ type: 'ADVANCE_TUTORIAL' }), 1000)
+          }
+          break
+        case 2: // Target Selection - advance when player performs targeting action
+          // Advancement handled by player actions in GameContext
+          break
+        case 3: // Attacking - advance when an attack has occurred
+          // This is handled by the APPLY_ATTACK_DAMAGE action
+          break
+        case 4: // Turn Flow - advance when turn ends
+          // This will be handled by the endTurn function dispatching advance
+          break
+        case 5: // Reinforcement - no advance needed
+          break
+      }
+    }
+
+    // Check progression on state changes
+    checkTutorialProgression()
+
     const handleAdvanceTutorial = () => {
       dispatch({ type: 'ADVANCE_TUTORIAL' })
     }
 
+  const handleFinishTutorial = () => {
+    // Return to login screen when tutorial finishes
+    dispatch({ type: 'GO_TO_LOGIN' })
+  }
+
     window.addEventListener('advanceTutorial', handleAdvanceTutorial)
-    return () => window.removeEventListener('advanceTutorial', handleAdvanceTutorial)
-  }, [dispatch])
+    window.addEventListener('finishTutorial', handleFinishTutorial)
+    return () => {
+      window.removeEventListener('advanceTutorial', handleAdvanceTutorial)
+      window.removeEventListener('finishTutorial', handleFinishTutorial)
+    }
+  }, [tutorialMode, tutorialStep, player1.field, player2.field, dispatch])
 
   return (
     <div className="board-container">
       <div className="board-root">
-      <div className="board-section board-top">
+      <div className={`board-section board-top ${getTutorialHighlightClass('battlefield')}`}>
         <div className="hero-area">
           <Hero
             heroKey="player2"
@@ -787,7 +861,7 @@ export default function Board() {
           />
         </div>
 
-        <div className="hero-area">
+        <div className={`hero-area ${getTutorialHighlightClass('hero')}`}>
           <Hero
             heroKey="player1"
             name="Player"
@@ -815,10 +889,12 @@ export default function Board() {
         </div>
       </div>
 
-      <Hand cards={player1.hand} onPlayCard={playCard} playerMana={player1.mana} />
+      <div className={getTutorialHighlightClass('hand')}>
+        <Hand cards={player1.hand} onPlayCard={playCard} playerMana={player1.mana} />
+      </div>
 
-      <div className="controls">
-        <button className="btn" onClick={endTurn} disabled={turn !== 1}>
+      <div className={`controls ${getTutorialHighlightClass('end-turn')}`}>
+        <button className="btn" data-tutorial="end-turn" onClick={endTurn} disabled={turn !== 1}>
           End Turn
         </button>
       </div>

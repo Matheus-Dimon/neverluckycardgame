@@ -174,13 +174,25 @@ const translations = {
           title: "Entendendo Custos e Efeitos das Cartas",
           message: "Cada carta custa mana para jogar. Algumas cartas têm efeitos especiais quando jogadas, como causar dano ou curar aliados."
         },
-        combat: {
-          title: "Combate Básico",
-          message: "Clique em uma de suas unidades para selecioná-la, então clique em uma unidade ou herói inimigo para atacar. Sua unidade causa dano e pode tomar dano de volta!"
+        select_unit: {
+          title: "Passo 1: Clique na Carta para Selecionar",
+          message: "Clique em uma das suas unidades no campo de batalha para selecioná-la. Observe como ela fica destacada em azul quando selecionada!"
+        },
+        choose_target: {
+          title: "Passo 2: Clique no Alvo para Atacar",
+          message: "Agora clique em uma unidade inimiga ou no herói inimigo para executar o ataque. Sua unidade irá causar dano ao alvo selecionado!"
+        },
+        attack_execution: {
+          title: "Ataque Executado!",
+          message: "Excelente! Você completou seu primeiro ataque. As unidades podem atacar apenas uma vez por turno. Alguns inimigos podem contra-atacar!"
+        },
+        end_turn_guide: {
+          title: "Passo 3: Clique em 'End Turn'",
+          message: "Quando terminar suas ações, clique no botão 'End Turn' no canto inferior direito. Isso finaliza seu turno e deixa o oponente jogar!"
         },
         turn_flow: {
-          title: "Fluxo dos Turnos",
-          message: "Cada turno: Compre uma carta, ganhe mana, jogue cartas, use poderes de herói, ataque com unidades, então termine o turno. O jogo flui de um lado para o outro!"
+          title: "Fluxo Completo dos Turnos",
+          message: "Cada turno: Compre uma carta, ganhe mana, jogue cartas, use poderes de herói, ataque com unidades, então clique 'End Turn'. O jogo flui de um lado para o outro!"
         },
         feedback: {
           title: "Muito Bem!",
@@ -189,6 +201,30 @@ const translations = {
         next_steps: {
           title: "Pronto para Mais?",
           message: "Agora você sabe como jogar! Tente uma partida completa contra a IA, ou desafie um amigo. Lembre-se: estratégia, timing e posicionamento de unidades são chave para a vitória!"
+        },
+        hero_powers_guide: {
+          title: "Poderes de Herói",
+          message: "Clique no botão do poder do herói abaixo do seu herói. Cada herói tem poderes únicos como causar dano, curar ou efeitos especiais. Você pode usá-lo uma vez por turno se tiver mana suficiente!"
+        },
+        cleric_mechanics: {
+          title: "Cura de Clérigos",
+          message: "Unidades clérigos curam em vez de atacar! Quando você seleciona um clérigo e clica em um aliado (ou seu herói), ele restaura vida em vez de causar dano. Perfeito para manter sua equipe viva!"
+        },
+        special_effects: {
+          title: "Efeitos Especiais das Cartas",
+          message: "Algumas cartas têm efeitos especiais: Grito de Batalha (ativa ao ser jogada), Investida (ataca imediatamente), Provocação (deve ser atacado primeiro), ou Imune Primeiro Turno (não pode ser danificado no turno em que foi jogada)!"
+        },
+        counter_attacks: {
+          title: "Contra-Ataques",
+          message: "Quando unidades corpo a corpo atacam umas às outras, ambas causam dano! O atacante acerta primeiro, então o defensor contra-ataca. Planeje suas trocas com cuidado!"
+        },
+        armor_system: {
+          title: "Proteção de Armadura",
+          message: "Alguns poderes de herói dão armadura! A armadura absorve dano antes de atingir a vida do herói. É uma proteção temporária que ajuda você a sobreviver mais!"
+        },
+        advanced_targeting: {
+          title: "Mirar Avançado",
+          message: "Poderes de herói que requerem alvos irão destacar opções válidas. Clique em unidades inimigas para poderes de dano, ou suas próprias unidades/heróis para poderes de cura. Mirar é crucial para poderes de herói efetivos!"
         }
       }
     },

@@ -1,142 +1,259 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { useLanguage } from '../context/LanguageContext'
+import { GameContext } from '../context/GameContext.jsx'
 
 export default function ImmersiveTutorial({ isOpen, onClose, onAdvanceTutorial, tutorialStep, tutorialHighlights, tutorialMessage }) {
   const { t } = useLanguage()
+  const { state, dispatch } = useContext(GameContext)
   const [currentStep, setCurrentStep] = useState(0)
   const [showArrow, setShowArrow] = useState(true)
 
+  // Mandatory step-by-step tutorial in exact required order
+  // Each step defines element targeting for arrows and highlights using data attributes and CSS selectors
   const tutorialSteps = [
     {
-      id: 'welcome',
-      title: t('tutorial.immersive_tutorial.welcome.title') || "Welcome to NeverLucky!",
-      message: t('tutorial.immersive_tutorial.welcome.message') || "This is a card game where you'll build your army and battle against your opponent. Your goal is to reduce their hero's HP to zero. Let's learn how to play!",
-      highlight: null,
-      position: 'center',
-      arrow: null,
-      duration: 5000
-    },
-    {
+      // Step 0: Interface Overview - Highlights all major UI areas with continue button
+      // Targets: .hand (CSS class), .lanes-vertical (CSS class), [data-hero="player1"] (data attribute), [data-hero="player1"] for mana
       id: 'interface_overview',
-      title: t('tutorial.immersive_tutorial.interface.title') || "Let's explore the interface",
-      message: t('tutorial.immersive_tutorial.interface.message') || "See the key areas of the game board. An arrow will point to each important element.",
-      highlight: 'hand',
-      position: 'top-right',
-      arrow: { target: 'hand', direction: 'down' },
-      duration: 4000
-    },
-    {
-      id: 'hand_explanation',
-      title: t('tutorial.immersive_tutorial.hand.title') || "Your Hand",
-      message: t('tutorial.immersive_tutorial.hand.message') || "These are the cards in your hand. Each card shows its cost, attack, and defense. Click on a card to play it!",
-      highlight: 'hand',
-      position: 'top-right',
-      arrow: { target: 'hand', direction: 'down' },
-      duration: 5000
-    },
-    {
-      id: 'mana_explanation',
-      title: t('tutorial.immersive_tutorial.mana.title') || "Mana Crystals",
-      message: t('tutorial.immersive_tutorial.mana.message') || "These glowing crystals show your mana. You need mana to play cards. You get 1 more each turn, up to 10!",
-      highlight: 'mana',
-      position: 'top-left',
-      arrow: { target: 'mana', direction: 'down' },
-      duration: 5000
-    },
-    {
-      id: 'board_explanation',
-      title: t('tutorial.immersive_tutorial.board.title') || "The Battlefield",
-      message: t('tutorial.immersive_tutorial.board.message') || "Units are placed in two lanes: Melee (close combat) and Ranged (long distance). Melee units can attack the enemy hero if no enemy melee units block them.",
-      highlight: 'battlefield',
+      title: "Understanding the Interface",
+      message: "Welcome to NeverLucky! Let's explore the game interface. These are the key areas you'll use: your hand, the battlefield, your hero, and resource counters.",
+      highlight: ['hand', 'battlefield', 'hero', 'mana'],
       position: 'center',
-      arrow: { target: 'battlefield', direction: 'up' },
-      duration: 6000
+      arrow: null,
+      requiresAction: true,
+      canSkip: false,
+      duration: 0,
+      uiLock: { enabledElements: [], disabledElements: ['all'] }
     },
     {
-      id: 'hero_explanation',
-      title: t('tutorial.immersive_tutorial.hero.title') || "Your Hero",
-      message: t('tutorial.immersive_tutorial.hero.message') || "This is your hero! If their HP reaches zero, you lose the game. Protect them with your units!",
-      highlight: 'hero',
-      position: 'bottom-left',
-      arrow: { target: 'hero', direction: 'up' },
-      duration: 5000
-    },
-    {
-      id: 'first_action_draw',
-      title: t('tutorial.immersive_tutorial.first_action.title') || "Your First Action: Drawing Cards",
-      message: t('tutorial.immersive_tutorial.first_action.message') || "At the start of each turn, you'll draw a card from your deck. This gives you more options to play!",
-      highlight: 'deck',
-      position: 'top-right',
-      arrow: { target: 'deck', direction: 'left' },
-      duration: 4000
-    },
-    {
-      id: 'play_card_guide',
-      title: t('tutorial.immersive_tutorial.play_card.title') || "Playing Your First Card",
-      message: t('tutorial.immersive_tutorial.play_card.message') || "Click on a card in your hand that costs less than or equal to your current mana. Watch it appear on the battlefield!",
-      highlight: 'hand',
-      position: 'top-right',
-      arrow: { target: 'hand', direction: 'down' },
-      duration: 5000
-    },
-    {
-      id: 'card_costs_effects',
-      title: t('tutorial.immersive_tutorial.card_costs.title') || "Understanding Card Costs and Effects",
-      message: t('tutorial.immersive_tutorial.card_costs.message') || "Each card costs mana to play. Some cards have special effects when played, like dealing damage or healing allies.",
-      highlight: 'card-tooltip',
-      position: 'top-center',
-      arrow: { target: 'card-tooltip', direction: 'up' },
-      duration: 5000
-    },
-    {
-      id: 'combat_interaction',
-      title: t('tutorial.immersive_tutorial.combat.title') || "Basic Combat",
-      message: t('tutorial.immersive_tutorial.combat.message') || "Click on one of your units to select it, then click on an enemy unit or hero to attack. Your unit deals damage and might take damage back!",
-      highlight: 'unit',
+      // Step 1: Playing a Card - Combined card selection and placement
+      // Targets specific card in hand and battlefield lanes
+      // Arrow points to first card in player's hand during tutorial
+      id: 'play_card',
+      title: "Playing a Card",
+      message: "Select a card from your hand and place it on the battlefield. Click on the card to select it, then drag it to a valid placement zone on the battlefield.",
+      highlight: ['tutorial-card-0', 'battlefield-placement'],
       position: 'center',
-      arrow: { target: 'unit', direction: 'up' },
-      duration: 6000
+      arrow: { target: 'tutorial-card-0', direction: 'down' },
+      requiresAction: true,
+      canSkip: false,
+      duration: 0,
+      uiLock: { enabledElements: ['tutorial-card-0', 'battlefield-placement'], disabledElements: ['hero', 'end-turn', 'other-cards'] }
     },
     {
+      // Step 3: Target Selection - Targets enemy units for attack targeting
+      // Target: [data-card-id][data-player="player2"] (enemy cards with data attributes)
+      // Arrow points to enemy units that appear on the battlefield
+      id: 'target_selection',
+      title: "Target Selection",
+      message: "Click on the enemy unit that appears. A target is any enemy card or enemy player you want to affect.",
+      highlight: ['enemy-target'],
+      position: 'center',
+      arrow: { target: 'enemy-target', direction: 'up' },
+      requiresAction: true,
+      canSkip: false,
+      duration: 0,
+      uiLock: { enabledElements: ['enemy-target'], disabledElements: ['hand', 'hero', 'end-turn', 'own-units'] }
+    },
+    {
+      // Step 4: Turn Flow - Targets end turn button to complete tutorial
+      // Target: [data-tutorial="end-turn"] (data attribute on end turn button)
+      // Arrow points to end turn button to complete the turn sequence
       id: 'turn_flow',
-      title: t('tutorial.immersive_tutorial.turn_flow.title') || "Turn Flow",
-      message: t('tutorial.immersive_tutorial.turn_flow.message') || "Each turn: Draw a card, gain mana, play cards, use hero powers, attack with units, then click 'End Turn'. The game flows back and forth!",
-      highlight: 'end-turn',
-      position: 'bottom-center',
+      title: "Turn Flow",
+      message: "Click 'End Turn' to complete your turn. Each turn follows this order: draw cards, gain mana, play cards, attack, then end turn.",
+      highlight: ['end-turn'],
+      position: 'center',
       arrow: { target: 'end-turn', direction: 'up' },
-      duration: 6000
+      requiresAction: true,
+      canSkip: false,
+      duration: 0,
+      uiLock: { enabledElements: ['end-turn'], disabledElements: ['hand', 'battlefield', 'hero'] }
     },
     {
-      id: 'positive_feedback',
-      title: t('tutorial.immersive_tutorial.feedback.title') || "Great Job!",
-      message: t('tutorial.immersive_tutorial.feedback.message') || "You're doing fantastic! You've learned the basics of NeverLucky. Keep practicing and you'll master the game in no time!",
-      highlight: null,
+      // Step 5: Attacking - Targets player's own units for attack selection
+      // Target: [data-card-id]:not([data-player="player2"]) (player's cards excluding enemy cards)
+      // Arrow points to player's units that can be selected to attack
+      id: 'reinforcement_attack',
+      title: "Attacking",
+      message: "Click on the card in the battlefield and select the target to attack.",
+      highlight: ['own-unit-attack', 'enemy-target'],
       position: 'center',
-      arrow: null,
-      duration: 5000
+      arrow: { target: 'own-unit-attack', direction: 'up' },
+      requiresAction: true,
+      canSkip: false,
+      duration: 0,
+      uiLock: { enabledElements: ['own-unit-attack', 'enemy-target'], disabledElements: ['hand', 'hero', 'end-turn'] }
     },
     {
-      id: 'next_steps',
-      title: t('tutorial.immersive_tutorial.next_steps.title') || "Ready for More?",
-      message: t('tutorial.immersive_tutorial.next_steps.message') || "Now you know how to play! Try a full game against the AI, or challenge a friend. Remember: strategy, timing, and unit placement are key to victory!",
-      highlight: null,
+      // Step 6: Tutorial Complete - Wait for opponent defeat
+      // No targets - summary and conclusion of tutorial
+      id: 'tutorial_complete',
+      title: "Tutorial Complete",
+      message: "Perfect! You've completed all the basic actions. Now defeat your opponent to finish the tutorial!",
+      highlight: [],
       position: 'center',
       arrow: null,
-      duration: 5000
+      requiresAction: true,
+      canSkip: false,
+      duration: 0,
+      uiLock: { enabledElements: [], disabledElements: ['all'] }
     }
   ]
 
+  // Function to validate if required elements exist for current tutorial step
+  const validateTutorialElements = (step) => {
+    if (!step || !step.highlight || step.highlight.length === 0) return true
+
+    // Check if at least one required element exists for each highlight target
+    return step.highlight.every(highlight => {
+      let selector = ''
+
+      switch (highlight) {
+        case 'hand':
+          selector = '.hand'
+          break
+        case 'battlefield':
+          selector = '.lanes-vertical'
+          break
+        case 'hero':
+          selector = '[data-hero="player1"]'
+          break
+        case 'mana':
+          selector = '[data-hero="player1"]'
+          break
+        case 'tutorial-card-0':
+          selector = '[data-card-id="tutorial-card-0"]'
+          break
+        case 'battlefield-placement':
+          selector = '.lanes-vertical'
+          break
+        case 'enemy-target':
+          selector = '[data-card-id][data-player="player2"]'
+          break
+        case 'own-unit-attack':
+          selector = '[data-card-id]:not([data-player="player2"])'
+          break
+        case 'end-turn':
+          selector = '.controls .btn'
+          break
+        default:
+          return true // Skip validation for unknown targets
+      }
+
+      const element = document.querySelector(selector)
+      return element !== null
+    })
+  }
+
+  // Function to apply highlight styles to elements based on tutorial step
+  const applyHighlightStyles = () => {
+    if (!tutorialHighlights || tutorialHighlights.length === 0) return
+
+    // Remove previous highlights
+    document.querySelectorAll('.tutorial-highlight').forEach(el => {
+      el.classList.remove('tutorial-highlight')
+    })
+
+    tutorialHighlights.forEach(highlight => {
+      let selector = ''
+
+      switch (highlight) {
+        case 'hand':
+          selector = '.hand'
+          break
+        case 'battlefield':
+          selector = '.lanes-vertical'
+          break
+        case 'hero':
+          selector = '[data-hero="player1"]'
+          break
+        case 'mana':
+          // Mana is part of hero, highlight the hero
+          selector = '[data-hero="player1"]'
+          break
+        case 'tutorial-card-0':
+          // Specific card in hand during tutorial
+          selector = '[data-card-id="tutorial-card-0"]'
+          break
+        case 'battlefield-placement':
+          // Battlefield lanes for placement
+          selector = '.lanes-vertical'
+          break
+        case 'enemy-target':
+          // Enemy units
+          selector = '[data-card-id][data-player="player2"]'
+          break
+        case 'own-unit-attack':
+          // Player's units
+          selector = '[data-card-id]:not([data-player="player2"])'
+          break
+        case 'end-turn':
+          // End turn button
+          selector = '[data-tutorial="end-turn"]'
+          break
+        default:
+          return
+      }
+
+      const element = document.querySelector(selector)
+      if (element) {
+        element.classList.add('tutorial-highlight')
+      }
+    })
+  }
+
+  const getMessagePosition = (position) => {
+    switch (position) {
+      case 'top-left':
+        return { top: '10%', left: '10%' }
+      case 'top-right':
+        return { top: '10%', right: '10%' }
+      case 'top-center':
+        return { top: '10%', left: '50%', transform: 'translateX(-50%)' }
+      case 'bottom-left':
+        return { bottom: '10%', left: '10%' }
+      case 'bottom-center':
+        return { bottom: '10%', left: '50%', transform: 'translateX(-50%)' }
+      case 'bottom-right':
+        return { bottom: '10%', right: '10%' }
+      case 'center':
+      default:
+        return { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }
+    }
+  }
+
   useEffect(() => {
     if (tutorialStep !== undefined) {
-      setCurrentStep(tutorialStep)
+      const step = tutorialSteps[tutorialStep]
+
+      // Validate elements exist before setting step
+      if (step && validateTutorialElements(step)) {
+        setCurrentStep(tutorialStep)
+      } else {
+        console.warn(`Tutorial step ${tutorialStep} skipped: required elements not found`)
+        // Try to advance to next valid step
+        if (tutorialStep < tutorialSteps.length - 1) {
+          const nextStep = tutorialStep + 1
+          const nextStepData = tutorialSteps[nextStep]
+          if (nextStepData && validateTutorialElements(nextStepData)) {
+            setCurrentStep(nextStep)
+            onAdvanceTutorial && onAdvanceTutorial(nextStep)
+          }
+        }
+      }
     }
-  }, [tutorialStep])
+  }, [tutorialStep, tutorialSteps, onAdvanceTutorial])
 
   useEffect(() => {
     if (!isOpen) return
 
     const step = tutorialSteps[currentStep]
-    if (step && step.duration) {
+
+    // Only auto-advance for certain steps that don't require player action
+    const autoAdvanceSteps = ['welcome', 'interface_overview', 'hand_explanation', 'mana_explanation', 'board_explanation', 'hero_explanation', 'attack_execution', 'turn_flow', 'positive_feedback']
+
+    if (step && step.duration && autoAdvanceSteps.includes(step.id)) {
       const timer = setTimeout(() => {
         if (currentStep < tutorialSteps.length - 1) {
           const nextStep = currentStep + 1
@@ -158,9 +275,17 @@ export default function ImmersiveTutorial({ isOpen, onClose, onAdvanceTutorial, 
     return () => clearTimeout(timer)
   }, [currentStep])
 
+  // Apply highlights when tutorial highlights change
+  useEffect(() => {
+    applyHighlightStyles()
+  }, [tutorialHighlights, currentStep])
+
   if (!isOpen || currentStep >= tutorialSteps.length) return null
 
   const step = tutorialSteps[currentStep]
+
+  // Special handling for tutorial_complete step - only show when opponent is defeated
+  if (step.id === 'tutorial_complete' && state.player2.hp > 0) return null
 
   const getArrowStyle = (arrow) => {
     if (!arrow || !showArrow) return {}
@@ -174,58 +299,194 @@ export default function ImmersiveTutorial({ isOpen, onClose, onAdvanceTutorial, 
       pointerEvents: 'none'
     }
 
-    // Position arrows based on target
+    // Dynamic positioning based on actual element positions with validation
+    const getElementPosition = (selector) => {
+      const element = document.querySelector(selector)
+      if (element) {
+        const rect = element.getBoundingClientRect()
+        return {
+          top: rect.top + window.scrollY,
+          left: rect.left + window.scrollX,
+          width: rect.width,
+          height: rect.height,
+          centerX: rect.left + rect.width / 2,
+          centerY: rect.top + rect.height / 2,
+          element: element // Keep reference for validation
+        }
+      }
+      return null
+    }
+
+    let position = {}
+
     switch (arrow.target) {
-      case 'hand':
-        return { ...baseStyle, bottom: '30%', left: '50%', transform: 'translateX(-50%)' }
-      case 'mana':
-        return { ...baseStyle, top: '15%', right: '15%' }
-      case 'battlefield':
-        return { ...baseStyle, top: '45%', left: '50%', transform: 'translateX(-50%)' }
-      case 'hero':
-        return { ...baseStyle, bottom: '30%', left: '15%' }
-      case 'deck':
-        return { ...baseStyle, top: '20%', right: '10%' }
-      case 'card-tooltip':
-        return { ...baseStyle, top: '25%', left: '50%', transform: 'translateX(-50%)' }
-      case 'unit':
-        return { ...baseStyle, top: '40%', left: '50%', transform: 'translateX(-50%)' }
-      case 'end-turn':
-        return { ...baseStyle, bottom: '20%', left: '50%', transform: 'translateX(-50%)' }
+      // Tutorial-specific targets with proper data attributes
+      case 'tutorial-card-0': {
+        // Target first card in hand during card selection tutorial step
+        const cardPos = getElementPosition('[data-card-id="tutorial-card-0"]')
+        if (cardPos) {
+          position = {
+            top: cardPos.top - 60,
+            left: cardPos.centerX - 24,
+            transform: 'translateX(0)'
+          }
+        } else {
+          position = { bottom: '30%', left: '20%', transform: 'translateX(-50%)' }
+        }
+        break
+      }
+      case 'battlefield-placement': {
+        // Target valid battlefield placement zones (melee and ranged lanes)
+        const battlefieldPos = getElementPosition('.lanes-vertical')
+        if (battlefieldPos) {
+          position = {
+            top: battlefieldPos.centerY - 24,
+            left: battlefieldPos.centerX - 24
+          }
+        } else {
+          position = { top: '45%', left: '50%', transform: 'translateX(-50%)' }
+        }
+        break
+      }
+      case 'enemy-target': {
+        // Target enemy units that appear during tutorial
+        const enemyUnitPos = getElementPosition('[data-card-id][data-player="player2"]')
+        if (enemyUnitPos) {
+          position = {
+            top: enemyUnitPos.top - 60,
+            left: enemyUnitPos.centerX - 24
+          }
+        } else {
+          position = { top: '25%', left: '70%', transform: 'translateX(-50%)' }
+        }
+        break
+      }
+      case 'own-unit-attack': {
+        // Target player's units for attacking tutorial
+        const playerUnitPos = getElementPosition('[data-card-id]:not([data-player="player2"])')
+        if (playerUnitPos) {
+          position = {
+            top: playerUnitPos.top - 60,
+            left: playerUnitPos.centerX - 24
+          }
+        } else {
+          position = { top: '55%', left: '30%', transform: 'translateX(-50%)' }
+        }
+        break
+      }
+
+      // General UI element targets
+      case 'hand': {
+        const handPos = getElementPosition('.hand')
+        if (handPos) {
+          position = {
+            top: handPos.top - 60,
+            left: handPos.centerX - 24,
+            transform: 'translateX(0)'
+          }
+        } else {
+          position = { bottom: '30%', left: '50%', transform: 'translateX(-50%)' }
+        }
+        break
+      }
+      case 'mana': {
+        const heroPos = getElementPosition('[data-hero="player1"]')
+        if (heroPos) {
+          position = {
+            top: heroPos.top - 10,
+            left: heroPos.left + heroPos.width + 10
+          }
+        } else {
+          position = { top: '15%', right: '15%' }
+        }
+        break
+      }
+      case 'battlefield': {
+        const battlefieldPos = getElementPosition('.lanes-vertical')
+        if (battlefieldPos) {
+          position = {
+            top: battlefieldPos.centerY - 24,
+            left: battlefieldPos.centerX - 24
+          }
+        } else {
+          position = { top: '45%', left: '50%', transform: 'translateX(-50%)' }
+        }
+        break
+      }
+      case 'hero': {
+        const heroPos = getElementPosition('[data-hero="player1"]')
+        if (heroPos) {
+          position = {
+            top: heroPos.top - 60,
+            left: heroPos.centerX - 24
+          }
+        } else {
+          position = { bottom: '30%', left: '15%' }
+        }
+        break
+      }
+      case 'deck': {
+        const deckPos = getElementPosition('.deck-area') || getElementPosition('[data-deck]')
+        if (deckPos) {
+          position = {
+            top: deckPos.top - 60,
+            left: deckPos.centerX - 24
+          }
+        } else {
+          position = { top: '20%', right: '10%' }
+        }
+        break
+      }
+      case 'card-tooltip': {
+        position = { top: '25%', left: '50%', transform: 'translateX(-50%)' }
+        break
+      }
+      case 'unit': {
+        // Find first unit on player's field
+        const unitPos = getElementPosition('[data-card-id]:not([data-player="player2"])')
+        if (unitPos) {
+          position = {
+            top: unitPos.top - 60,
+            left: unitPos.centerX - 24
+          }
+        } else {
+          position = { top: '40%', left: '50%', transform: 'translateX(-50%)' }
+        }
+        break
+      }
+      case 'enemy-unit': {
+        // Find first enemy unit
+        const unitPos = getElementPosition('[data-card-id][data-player="player2"]')
+        if (unitPos) {
+          position = {
+            top: unitPos.top - 60,
+            left: unitPos.centerX - 24
+          }
+        } else {
+          position = { top: '40%', left: '50%', transform: 'translateX(-50%)' }
+        }
+        break
+      }
+      case 'end-turn': {
+        const buttonPos = getElementPosition('.controls .btn')
+        if (buttonPos) {
+          position = {
+            top: buttonPos.top - 60,
+            left: buttonPos.centerX - 24
+          }
+        } else {
+          position = { bottom: '20%', left: '50%', transform: 'translateX(-50%)' }
+        }
+        break
+      }
       default:
-        return baseStyle
+        position = { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }
     }
+
+    return { ...baseStyle, ...position }
   }
 
-  const getHighlightStyle = (highlight) => {
-    if (!highlight || !tutorialHighlights.includes(highlight)) return {}
 
-    // Add glowing outline to highlighted elements
-    return {
-      boxShadow: '0 0 20px #f5c06b, 0 0 40px #f5c06b',
-      border: '2px solid #f5c06b',
-      borderRadius: '8px',
-      transition: 'all 0.3s ease'
-    }
-  }
-
-  const getMessagePosition = (position) => {
-    switch (position) {
-      case 'top-left':
-        return { top: '10%', left: '10%' }
-      case 'top-right':
-        return { top: '10%', right: '10%' }
-      case 'top-center':
-        return { top: '10%', left: '50%', transform: 'translateX(-50%)' }
-      case 'bottom-left':
-        return { bottom: '10%', left: '10%' }
-      case 'bottom-center':
-        return { bottom: '10%', left: '50%', transform: 'translateX(-50%)' }
-      case 'center':
-      default:
-        return { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }
-    }
-  }
 
   return (
     <>
@@ -236,7 +497,7 @@ export default function ImmersiveTutorial({ isOpen, onClose, onAdvanceTutorial, 
         left: 0,
         right: 0,
         bottom: 0,
-        background: 'rgba(0,0,0,0.6)',
+        background: 'rgba(0,0,0,0.3)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -275,6 +536,78 @@ export default function ImmersiveTutorial({ isOpen, onClose, onAdvanceTutorial, 
             {step.message}
           </p>
 
+          {/* Continue Button - Only show for interface overview step */}
+          {step.id === 'interface_overview' && (
+            <button
+              onClick={() => {
+                if (currentStep < tutorialSteps.length - 1) {
+                  const nextStep = currentStep + 1
+                  setCurrentStep(nextStep)
+                  onAdvanceTutorial && onAdvanceTutorial(nextStep)
+                }
+              }}
+              style={{
+                marginTop: '20px',
+                background: '#f5c06b',
+                color: '#1e293b',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '12px 24px',
+                cursor: 'pointer',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
+                transition: 'all 0.2s ease',
+                pointerEvents: 'auto'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.transform = 'translateY(-2px)'
+                e.target.style.boxShadow = '0 6px 12px rgba(0,0,0,0.4)'
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = 'translateY(0)'
+                e.target.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)'
+              }}
+            >
+              Continuar
+            </button>
+          )}
+
+          {/* Finish Tutorial Button - Only show when opponent is defeated */}
+          {step.id === 'tutorial_complete' && state.player2.hp <= 0 && (
+            <button
+              onClick={() => {
+                // Dispatch action to go to login page
+                dispatch({ type: 'GO_TO_LOGIN' })
+                onClose && onClose()
+              }}
+              style={{
+                marginTop: '20px',
+                background: '#f5c06b',
+                color: '#1e293b',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '12px 24px',
+                cursor: 'pointer',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
+                transition: 'all 0.2s ease',
+                pointerEvents: 'auto'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.transform = 'translateY(-2px)'
+                e.target.style.boxShadow = '0 6px 12px rgba(0,0,0,0.4)'
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = 'translateY(0)'
+                e.target.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)'
+              }}
+            >
+              Voltar para Menu
+            </button>
+          )}
+
           {/* Progress indicator */}
           <div style={{
             position: 'absolute',
@@ -307,27 +640,29 @@ export default function ImmersiveTutorial({ isOpen, onClose, onAdvanceTutorial, 
         )}
       </div>
 
-      {/* Skip Button */}
-      <button
-        onClick={onClose}
-        style={{
-          position: 'fixed',
-          top: '20px',
-          right: '20px',
-          background: 'rgba(0,0,0,0.8)',
-          color: '#94a3b8',
-          border: '2px solid #94a3b8',
-          borderRadius: '8px',
-          padding: '8px 16px',
-          cursor: 'pointer',
-          fontSize: '14px',
-          fontWeight: 'bold',
-          zIndex: 10001,
-          pointerEvents: 'auto'
-        }}
-      >
-        {t('tutorial.skip') || 'Skip Tutorial'}
-      </button>
+      {/* Skip Button - Only show for steps that allow skipping */}
+      {step.canSkip && (
+        <button
+          onClick={onClose}
+          style={{
+            position: 'fixed',
+            top: '20px',
+            right: '20px',
+            background: 'rgba(0,0,0,0.8)',
+            color: '#94a3b8',
+            border: '2px solid #94a3b8',
+            borderRadius: '8px',
+            padding: '8px 16px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: 'bold',
+            zIndex: 10001,
+            pointerEvents: 'auto'
+          }}
+        >
+          {t('tutorial.skip') || 'Skip Tutorial'}
+        </button>
+      )}
 
       <style>{`
         @keyframes bounce {
@@ -342,35 +677,34 @@ export default function ImmersiveTutorial({ isOpen, onClose, onAdvanceTutorial, 
           }
         }
 
-        /* Highlight styles for game elements */
-        .tutorial-highlight-hand {
-          box-shadow: 0 0 20px #f5c06b !important;
+        /* Dynamic highlight styles for tutorial elements */
+        .tutorial-highlight {
+          box-shadow: 0 0 20px #f5c06b, 0 0 40px #f5c06b !important;
           border: 2px solid #f5c06b !important;
+          border-radius: 8px !important;
+          transition: all 0.3s ease !important;
+          position: relative !important;
+          z-index: 9999 !important;
         }
 
-        .tutorial-highlight-mana {
-          box-shadow: 0 0 20px #f5c06b !important;
-          border: 2px solid #f5c06b !important;
+        /* Special handling for cards to ensure proper highlighting */
+        [data-card-id].tutorial-highlight {
+          box-shadow: 0 0 20px #f5c06b, 0 0 40px #f5c06b, inset 0 0 10px rgba(245, 192, 107, 0.3) !important;
         }
 
-        .tutorial-highlight-battlefield {
-          box-shadow: 0 0 20px #f5c06b !important;
-          border: 2px solid #f5c06b !important;
+        /* Special handling for hero highlighting */
+        [data-hero].tutorial-highlight {
+          box-shadow: 0 0 25px #f5c06b, 0 0 50px #f5c06b !important;
         }
 
-        .tutorial-highlight-hero {
-          box-shadow: 0 0 20px #f5c06b !important;
-          border: 2px solid #f5c06b !important;
+        /* Special handling for battlefield lanes */
+        .lanes-vertical.tutorial-highlight {
+          box-shadow: inset 0 0 30px rgba(245, 192, 107, 0.4), 0 0 20px #f5c06b !important;
         }
 
-        .tutorial-highlight-deck {
-          box-shadow: 0 0 20px #f5c06b !important;
-          border: 2px solid #f5c06b !important;
-        }
-
-        .tutorial-highlight-unit {
-          box-shadow: 0 0 20px #f5c06b !important;
-          border: 2px solid #f5c06b !important;
+        /* Special handling for hand */
+        .hand.tutorial-highlight {
+          box-shadow: 0 0 25px #f5c06b !important;
         }
       `}</style>
     </>

@@ -48,7 +48,7 @@ export default function BattlefieldLane({ cards = [], laneType, playerKey, onCar
   }
 
   return (
-    <div className={`lane lane-${laneType}`}>
+    <div className={`lane lane-${laneType}`} data-lane={laneType} data-player={playerKey}>
       <div className="lane-header">{laneType === 'melee' ? 'CORPO A CORPO' : 'LONGA DISTÂNCIA'}</div>
       <motion.div className="lane-cards" variants={laneVariants} initial="hidden" animate="visible">
         <AnimatePresence>

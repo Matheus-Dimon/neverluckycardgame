@@ -403,6 +403,14 @@ function applyHeroPowerEffect(state, playerKey, power, targetCardId = null, targ
 function reducer(state=initialState, action){
   switch(action.type){
 
+    case 'GO_TO_START_MENU': {
+      return { ...state, gamePhase: 'START_MENU', tutorialMode: false };
+    }
+
+    case 'GO_TO_LOGIN': {
+      return { ...state, gamePhase: 'LOGIN_PAGE', tutorialMode: false };
+    }
+
     case 'GO_TO_PASSIVE_SKILLS': {
       return { ...state, gamePhase: 'PASSIVE_SKILLS' };
     }
@@ -571,16 +579,14 @@ function reducer(state=initialState, action){
         turn: state.turnCount
       })
 
-      // Tutorial message for first card played
+      // Tutorial advancement for card played
       if (state.tutorialMode && playerKey === 'player1') {
-        const totalCardsOnField = [...newState.player1.field.melee, ...newState.player1.field.ranged].length
-        if (totalCardsOnField === 1) {
+        if (state.tutorialStep === 1) { // play_card step - player played card
+          // Advance to target_selection step
           newState = {
             ...newState,
-            tutorialMessage: 'Ótimo! Você jogou sua primeira carta. Agora tente atacar com ela!',
-            tutorialMessageTimeout: Date.now(),
-            tutorialStep: 1,
-            tutorialHighlights: ['mana']
+            tutorialStep: 2, // Advance to target_selection
+            tutorialHighlights: ['enemy-target']
           }
         }
       }
@@ -862,15 +868,20 @@ function reducer(state=initialState, action){
         newState = {...newState, [playerKey]: attacker, [opponentKey]: opp}
       }
 
-      // Tutorial message for first attack
-      if (state.tutorialMode && playerKey === 'player1' && !targetIsHero && targetId) {
-        // Check if this is the first attack by counting attack log entries
-        const attackEntries = state.gameLog.filter(entry => entry.type === 'attack' && entry.player === 'player1').length
-        if (attackEntries === 0) { // This is the first attack
+      // Tutorial advancement for attack sequence
+      if (state.tutorialMode && playerKey === 'player1') {
+        if (state.tutorialStep === 2) { // target_selection step - player clicked enemy unit
+          // Advance to turn_flow step
           newState = {
             ...newState,
-            tutorialMessage: 'Excelente! Você atacou uma unidade inimiga. Ela também ataca de volta!',
-            tutorialMessageTimeout: Date.now()
+            tutorialStep: 3, // Advance to turn_flow
+            tutorialHighlights: ['end-turn']
+          }
+        } else if (state.tutorialStep === 4) { // attacking step - player completed attack
+          // Advance to reinforcement_attack step
+          newState = {
+            ...newState,
+            tutorialStep: 5 // Advance to reinforcement_attack
           }
         }
       }
@@ -903,12 +914,14 @@ function reducer(state=initialState, action){
       next.deck = next.deck.slice(1)
 
       // Add log entry for turn change
-      const newState = {...state, turn: nextTurn, turnCount: newTurnCount, [nextKey]: next}
-      return addGameLogEntry(newState, {
+      let newState = {...state, turn: nextTurn, turnCount: newTurnCount, [nextKey]: next}
+      newState = addGameLogEntry(newState, {
         type: 'turn_start',
         player: nextKey,
         turn: newTurnCount
       })
+
+      return newState
     }
 
     case 'RESTART_GAME': {
@@ -930,12 +943,10 @@ function reducer(state=initialState, action){
     }
 
     case 'START_TUTORIAL': {
-      // Start tutorial mode with pre-configured deck and settings
-      // Use actual card IDs from CARD_OPTIONS.P1
-      const tutorialDeck = ['p1_001', 'p1_002', 'p1_003', 'p1_004', 'p1_005'] // Basic warrior, archer, cleric, and two more
-      const tutorialPowers = ['damage', 'heal']
+      // Start mandatory step-by-step tutorial mode
+      const tutorialDeck = ['p1_001', 'p1_002'] // Just warrior and archer for tutorial
+      const tutorialPowers = ['damage']
 
-      // Create tutorial deck with specific cards
       const p1Deck = makeOrderedDeck(CARD_OPTIONS.P1, tutorialDeck)
 
       let p1 = {
@@ -947,10 +958,12 @@ function reducer(state=initialState, action){
         deck: p1Deck,
         passiveSkills: [],
         hand: [],
+        mana: 2, // Start with enough mana for tutorial
+        maxMana: 2
       }
 
-      // Simple AI for tutorial - multiple weak units to play continuously
-      const aiDeck = ['p2_001', 'p2_001', 'p2_001', 'p2_001', 'p2_001'] // Multiple skeletons
+      // Tutorial AI - plays one weak unit
+      const aiDeck = ['p2_001'] // One skeleton
       const p2Deck = makeOrderedDeck(CARD_OPTIONS.P2, aiDeck)
 
       let p2 = {
@@ -959,7 +972,9 @@ function reducer(state=initialState, action){
         deck: p2Deck,
         passiveSkills: [],
         hand: [],
-        hp: 10, // Easier to defeat
+        hp: 5, // Very weak for tutorial
+        mana: 1,
+        maxMana: 1
       }
 
       // Apply passive effects (none for tutorial)
@@ -972,7 +987,7 @@ function reducer(state=initialState, action){
         p.deck = p.deck.slice(n)
       }
 
-      draw(p1, 3) // Tutorial starts with 3 cards
+      draw(p1, 1) // Tutorial starts with 1 card
       draw(p2, 1)
 
       return {
@@ -984,7 +999,8 @@ function reducer(state=initialState, action){
         turnCount: 1,
         tutorialMode: true,
         tutorialStep: 0,
-        tutorialHighlights: ['hand']
+        tutorialHighlights: ['hand', 'battlefield', 'hero', 'mana'],
+        tutorialUILock: { enabledElements: [], disabledElements: ['all'] }
       }
     }
 
@@ -1080,9 +1096,9 @@ export function GameProvider({children}){
       let mana = stateRef.current.player2.mana
       const aiPlayer = state.player2
 
-      // Special AI for tutorial mode - play continuously like normal AI but simplified
+      // Special AI for tutorial mode - play cards but don't attack to avoid interfering with tutorial
       if (state.tutorialMode) {
-        // Use early game AI logic for tutorial: play multiple cards and attack with all units
+        // Play tutorial card to provide target for player
         let remainingMana = mana
         const handCopy = [...state.player2.hand]
         while (remainingMana > 0) {
@@ -1100,33 +1116,8 @@ export function GameProvider({children}){
           if (cancelled) return
         }
 
-        // Attack with all units
-        const currentState = stateRef.current
-        const attackerUnits = [...currentState.player2.field.melee, ...currentState.player2.field.ranged].filter(c => c.canAttack)
-        const opponent = currentState.player1
-
-        for (const attacker of attackerUnits) {
-          if (cancelled) return
-
-          // Simple targeting: attack hero if no minions, otherwise attack first minion
-          const enemyMinions = [...opponent.field.melee, ...opponent.field.ranged]
-          let targetId = null
-          let targetIsHero = false
-
-          if (enemyMinions.length > 0) {
-            targetId = enemyMinions[0].id
-          } else {
-            targetIsHero = true
-          }
-
-          dispatch({
-            type: 'APPLY_ATTACK_DAMAGE',
-            payload: { attackerId: attacker.id, targetId, targetIsHero, damage: attacker.attack, playerKey: 'player2' }
-          })
-          await delay(500)
-        }
-
-        // End turn
+        // Don't attack during tutorial to prevent interference with tutorial commands
+        // Just end turn to let player proceed with tutorial
         dispatch({type: 'END_TURN'})
         return
       }
@@ -1422,6 +1413,15 @@ export function GameProvider({children}){
       dispatch({type: 'SET_AI_PROCESSING', payload: false})
     }
   }, [state.turn, state.isAITurnProcessing])
+
+  // Handle tutorial advancement
+  useEffect(() => {
+    if (state.tutorialMode && state.turn === 2 && state.tutorialStep === 3) {
+      setTimeout(() => {
+        dispatch({ type: 'ADVANCE_TUTORIAL' })
+      }, 500)
+    }
+  }, [state.tutorialMode, state.turn, state.tutorialStep])
 
   return <GameContext.Provider value={{ state, dispatch }}>{children}</GameContext.Provider>
 }

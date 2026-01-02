@@ -1,8 +1,12 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Card from './Card'
+import { GameContext } from '../context/GameContext.jsx'
 
 export default function Hand({ cards = [], onPlayCard, playerMana }) {
+  const { state } = useContext(GameContext)
+  const { tutorialMode, tutorialStep } = state
+
   const containerVariants = {
     hidden: {},
     visible: {
@@ -45,25 +49,48 @@ export default function Hand({ cards = [], onPlayCard, playerMana }) {
     }
   }
 
+  // Check if card is enabled during tutorial
+  const isCardEnabled = (index) => {
+    if (!tutorialMode) return true
+
+    // During card selection step (step 1), only allow the first card
+    if (tutorialStep === 1) {
+      return index === 0
+    }
+
+    // During other steps, disable all cards unless specifically allowed
+    return false
+  }
+
+  const handleCardClick = (card, index) => {
+    if (!isCardEnabled(index)) return
+    onPlayCard && onPlayCard(card)
+  }
+
   return (
     <motion.div className="hand" variants={containerVariants} initial="hidden" animate="visible">
       <AnimatePresence>
         {cards.map((c, index) => (
           <motion.div
             key={c.id}
-            data-card-id={c.id}
+            data-card-id={`tutorial-card-${index}`}
             variants={cardVariants}
             layout
             layoutId={c.id}
             exit="exit"
             initial="hidden"
             animate="visible"
-            whileHover={{ y: -10 }}
+            whileHover={isCardEnabled(index) ? { y: -10 } : {}}
+            style={{
+              opacity: isCardEnabled(index) ? 1 : 0.3,
+              pointerEvents: isCardEnabled(index) ? 'auto' : 'none',
+              filter: isCardEnabled(index) ? 'none' : 'grayscale(100%)'
+            }}
           >
             <Card
               card={c}
-              onClick={() => onPlayCard && onPlayCard(c)}
-              playable={playerMana >= c.mana}
+              onClick={() => handleCardClick(c, index)}
+              playable={playerMana >= c.mana && isCardEnabled(index)}
             />
           </motion.div>
         ))}
