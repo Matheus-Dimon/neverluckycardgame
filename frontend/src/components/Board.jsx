@@ -245,7 +245,7 @@ const playSound = (type) => {
 
 export default function Board() {
   const { state, dispatch } = useContext(GameContext)
-  const { t } = useLanguage()
+  const { language, switchLanguage, t } = useLanguage()
   const { player1, player2, turn, animation, targeting, gameOver, winner, gameLog, tutorialMode, tutorialStep, tutorialHighlights, tutorialMessage } = state
 
   // Apply tutorial highlight classes
@@ -788,14 +788,42 @@ export default function Board() {
     }
   }, [tutorialMode, tutorialStep, player1.field, player2.field, dispatch])
 
+  const handleLanguageSwitch = () => {
+    switchLanguage(language === 'pt' ? 'en' : 'pt');
+  };
+
   return (
     <div className="board-container">
+      {/* Language Switcher - Only show during tutorial mode */}
+      {tutorialMode && (
+        <button
+          className="language-switcher"
+          onClick={handleLanguageSwitch}
+          style={{
+            position: 'absolute',
+            top: '20px',
+            right: '20px',
+            padding: '8px 16px',
+            background: 'rgba(0,0,0,0.7)',
+            color: 'white',
+            border: '2px solid #f5c06b',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontSize: '12px',
+            fontWeight: 'bold',
+            zIndex: 10000
+          }}
+        >
+          {language === 'pt' ? t('switchToEnglish') : t('switchToPortuguese')}
+        </button>
+      )}
+
       <div className="board-root">
       <div className={`board-section board-top ${getTutorialHighlightClass('battlefield')}`}>
         <div className="hero-area">
           <Hero
             heroKey="player2"
-            name="Enemy"
+            name={t('gameUI.enemy')}
             hp={player2.hp}
             mana={player2.mana}
             armor={player2.armor}
@@ -869,7 +897,7 @@ export default function Board() {
         <div className={`hero-area ${getTutorialHighlightClass('hero')}`}>
           <Hero
             heroKey="player1"
-            name="Player"
+            name={t('gameUI.player')}
             hp={player1.hp}
             mana={player1.mana}
             armor={player1.armor}
@@ -900,7 +928,7 @@ export default function Board() {
 
       <div className={`controls ${getTutorialHighlightClass('end-turn')}`}>
         <button className="btn" data-tutorial="end-turn" onClick={endTurn} disabled={turn !== 1}>
-          End Turn
+          {t('gameUI.endTurn')}
         </button>
       </div>
 

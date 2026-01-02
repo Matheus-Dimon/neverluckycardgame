@@ -1,55 +1,57 @@
 import React, { useState } from 'react'
+import { useLanguage } from '../context/LanguageContext'
 
 export default function InstructionsPanel() {
   const [isOpen, setIsOpen] = useState(true)
+  const { t } = useLanguage()
 
   return (
     <div className={`instructions-panel ${isOpen ? 'open' : 'closed'}`}>
       <button className="instructions-toggle" onClick={() => setIsOpen(!isOpen)}>
-        {isOpen ? '📖 ▼' : '📖 ►'}
+        {isOpen ? t('instructions.toggleOpen') : t('instructions.toggleClosed')}
       </button>
-      
+
       {isOpen && (
         <div className="instructions-content">
-          <h3>📜 Como Jogar</h3>
-          
+          <h3>{t('instructions.title')}</h3>
+
           <div className="instruction-section">
-            <h4>⚔️ Combate</h4>
+            <h4>{t('instructions.sections.combat.title')}</h4>
             <ul>
-              <li><strong>Melee:</strong> Ataca corpo a corpo. Recebe dano ao atacar melee.</li>
-              <li><strong>Ranged:</strong> Ataca à distância. Não recebe dano ao atacar.</li>
-              <li>Melee pode atacar ranged se não houver melee inimigo.</li>
+              <li><strong>Melee:</strong> {t('instructions.sections.combat.melee')}</li>
+              <li><strong>Ranged:</strong> {t('instructions.sections.combat.ranged')}</li>
+              <li>{t('instructions.sections.combat.meleeVsRanged')}</li>
             </ul>
           </div>
 
           <div className="instruction-section">
-            <h4>✨ Efeitos das Cartas</h4>
+            <h4>{t('instructions.sections.cardEffects.title')}</h4>
             <ul>
-              <li>⚡ <strong>Charge:</strong> Ataca imediatamente</li>
-              <li>🛡️ <strong>Taunt:</strong> Deve ser atacado primeiro</li>
-              <li>✨ <strong>Imune 1ª Rodada:</strong> Não recebe dano no turno jogado</li>
-              <li>💉 <strong>Lifesteal:</strong> Cura o herói ao atacar</li>
-              <li>💥 <strong>Battlecry:</strong> Efeito ao ser jogada</li>
-              <li>🎲 <strong>Deathrattle:</strong> Efeito ao morrer</li>
+              <li>{t('instructions.sections.cardEffects.charge')}</li>
+              <li>{t('instructions.sections.cardEffects.taunt')}</li>
+              <li>{t('instructions.sections.cardEffects.immuneFirstTurn')}</li>
+              <li>{t('instructions.sections.cardEffects.lifesteal')}</li>
+              <li>{t('instructions.sections.cardEffects.battlecry')}</li>
+              <li>{t('instructions.sections.cardEffects.deathrattle')}</li>
             </ul>
           </div>
 
           <div className="instruction-section">
-            <h4>💎 Recursos</h4>
+            <h4>{t('instructions.sections.resources.title')}</h4>
             <ul>
-              <li>Ganhe +1 mana máxima por turno (máx. 10)</li>
-              <li>Compre 1 carta no início do turno</li>
-              <li>Use poderes de herói (1x por turno)</li>
+              <li>{t('instructions.sections.resources.manaGain')}</li>
+              <li>{t('instructions.sections.resources.cardDraw')}</li>
+              <li>{t('instructions.sections.resources.heroPower')}</li>
             </ul>
           </div>
 
           <div className="instruction-section">
-            <h4>🎯 Estratégia</h4>
+            <h4>{t('instructions.sections.strategy.title')}</h4>
             <ul>
-              <li>Controle o campo com unidades melee</li>
-              <li>Use ranged para eliminar ameaças</li>
-              <li>Clérigos curam além de 30 HP</li>
-              <li>Planeje seus turnos com antecedência</li>
+              <li>{t('instructions.sections.strategy.controlBoard')}</li>
+              <li>{t('instructions.sections.strategy.rangedThreats')}</li>
+              <li>{t('instructions.sections.strategy.clerics')}</li>
+              <li>{t('instructions.sections.strategy.planAhead')}</li>
             </ul>
           </div>
         </div>

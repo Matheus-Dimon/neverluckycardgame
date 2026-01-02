@@ -1,8 +1,11 @@
 import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useLanguage } from '../context/LanguageContext'
 import Card from './Card'
 
 export default function BattlefieldLane({ cards = [], laneType, playerKey, onCardClick, selectedCardId = null, selectedOwner = null, turnCount }) {
+  const { t } = useLanguage()
+
   const laneVariants = {
     hidden: {},
     visible: {
@@ -49,7 +52,7 @@ export default function BattlefieldLane({ cards = [], laneType, playerKey, onCar
 
   return (
     <div className={`lane lane-${laneType}`} data-lane={laneType} data-player={playerKey}>
-      <div className="lane-header">{laneType === 'melee' ? 'CORPO A CORPO' : 'LONGA DISTÂNCIA'}</div>
+      <div className="lane-header">{t(`lanes.${laneType}`)}</div>
       <motion.div className="lane-cards" variants={laneVariants} initial="hidden" animate="visible">
         <AnimatePresence>
           {cards.map(c => {

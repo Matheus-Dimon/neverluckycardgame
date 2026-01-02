@@ -112,8 +112,8 @@ const translations = {
         content: "Cada turno: Compre uma carta, jogue cartas, use poder de herói, ataque com unidades, então termine o turno. Planeje seus movimentos estrategicamente!"
       },
       strategy: {
-        title: "Basic Strategy",
-        content: "Control the board with melee units, use ranged for safe damage, heal with clerics, and time your hero powers wisely."
+        title: "Estratégia Básica",
+        content: "Controle o campo com unidades melee, use ranged para dano seguro, cure com clérigos, e tempo seus poderes de herói sabiamente."
       },
       dynamic: {
         card_played: {
@@ -171,11 +171,61 @@ const translations = {
       entries: "entradas"
     },
 
+    // Game UI
+    gameUI: {
+      endTurn: "Finalizar Turno",
+      player: "Jogador",
+      enemy: "Inimigo"
+    },
+
     // Targeting
     targeting: {
       select_target: "Selecione um alvo para {{powerName}}",
       select_heal_target: "Selecione um alvo para curar",
       cancel: "Cancelar"
+    },
+
+    // Gameboard Lanes
+    lanes: {
+      melee: "CORPO A CORPO",
+      ranged: "LONGA DISTÂNCIA"
+    },
+
+    // Instructions Panel
+    instructions: {
+      title: "📜 Como Jogar",
+      toggleOpen: "📖 ▼",
+      toggleClosed: "📖 ►",
+      sections: {
+        combat: {
+          title: "⚔️ Combate",
+          melee: "Melee: Ataca corpo a corpo. Recebe dano ao atacar melee.",
+          ranged: "Ranged: Ataca à distância. Não recebe dano ao atacar.",
+          meleeVsRanged: "Melee pode atacar ranged se não houver melee inimigo."
+        },
+        cardEffects: {
+          title: "✨ Efeitos das Cartas",
+          charge: "⚡ Charge: Ataca imediatamente",
+          taunt: "🛡️ Taunt: Deve ser atacado primeiro",
+          immuneFirstTurn: "✨ Imune 1ª Rodada: Não recebe dano no turno jogado",
+          lifesteal: "💉 Lifesteal: Cura o herói ao atacar",
+          battlecry: "💥 Battlecry: Efeito ao ser jogada",
+          deathrattle: "🎲 Deathrattle: Efeito ao morrer"
+        },
+        resources: {
+          title: "💎 Recursos",
+          manaGain: "Ganhe +1 mana máxima por turno (máx. 10)",
+          cardDraw: "Compre 1 carta no início do turno",
+          heroPower: "Use poderes de herói (1x por turno)"
+        },
+        strategy: {
+          title: "🎯 Estratégia",
+          controlBoard: "Controle o campo com unidades melee",
+          rangedThreats: "Use ranged para eliminar ameaças",
+          clerics: "Clérigos curam além de 30 HP",
+          planAhead: "Planeje seus turnos com antecedência"
+        }
+      }
     }
   },
   en: {
@@ -350,11 +400,61 @@ const translations = {
       entries: "entries"
     },
 
+    // Game UI
+    gameUI: {
+      endTurn: "End Turn",
+      player: "Player",
+      enemy: "Enemy"
+    },
+
     // Targeting
     targeting: {
       select_target: "Select a target for {{powerName}}",
       select_heal_target: "Select a target to heal",
       cancel: "Cancel"
+    },
+
+    // Gameboard Lanes
+    lanes: {
+      melee: "MELEE",
+      ranged: "RANGED"
+    },
+
+    // Instructions Panel
+    instructions: {
+      title: "📜 How to Play",
+      toggleOpen: "📖 ▼",
+      toggleClosed: "📖 ►",
+      sections: {
+        combat: {
+          title: "⚔️ Combat",
+          melee: "Melee: Attacks in close combat. Takes damage when attacking melee units.",
+          ranged: "Ranged: Attacks from distance. Takes no damage when attacking.",
+          meleeVsRanged: "Melee can attack ranged if no enemy melee units are present."
+        },
+        cardEffects: {
+          title: "✨ Card Effects",
+          charge: "⚡ Charge: Attacks immediately when played",
+          taunt: "🛡️ Taunt: Must be attacked first",
+          immuneFirstTurn: "✨ Immune First Turn: Takes no damage the turn it's played",
+          lifesteal: "💉 Lifesteal: Heals your hero when attacking",
+          battlecry: "💥 Battlecry: Effect when played",
+          deathrattle: "🎲 Deathrattle: Effect when dying"
+        },
+        resources: {
+          title: "💎 Resources",
+          manaGain: "Gain +1 max mana per turn (max 10)",
+          cardDraw: "Draw 1 card at the start of your turn",
+          heroPower: "Use hero powers (once per turn)"
+        },
+        strategy: {
+          title: "🎯 Strategy",
+          controlBoard: "Control the board with melee units",
+          rangedThreats: "Use ranged units to eliminate threats safely",
+          clerics: "Clerics can heal beyond 30 HP",
+          planAhead: "Plan your turns in advance"
+        }
+      }
     }
   }
 };
