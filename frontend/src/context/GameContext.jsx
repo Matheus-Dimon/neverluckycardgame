@@ -962,8 +962,37 @@ function reducer(state=initialState, action){
         maxMana: 2
       }
 
-      // Tutorial AI - plays one weak unit
-      const aiDeck = ['p2_001'] // One skeleton
+      // Tutorial AI - create deck with mana curve (low cost cards only)
+      const pool = CARD_OPTIONS.P2.filter(card => card.mana <= 3) // Only cards with mana cost 1-3
+      const selectedCards = []
+      const cardsByMana = {}
+
+      // Group by mana cost
+      pool.forEach(card => {
+        if (!cardsByMana[card.mana]) {
+          cardsByMana[card.mana] = []
+        }
+        cardsByMana[card.mana].push(card)
+      })
+
+      // Select 2 cards per mana cost for tutorial (smaller deck)
+      Object.keys(cardsByMana).forEach(manaCost => {
+        const cards = cardsByMana[manaCost]
+        const selectedCount = Math.min(2, cards.length)
+        for (let i = 0; i < selectedCount; i++) {
+          selectedCards.push(cards[i].id)
+        }
+      })
+
+      // Ensure we have at least 6 cards for tutorial
+      while (selectedCards.length < 6) {
+        const randomCard = pool[Math.floor(Math.random() * pool.length)]
+        if (!selectedCards.includes(randomCard.id)) {
+          selectedCards.push(randomCard.id)
+        }
+      }
+
+      const aiDeck = selectedCards.slice(0, 6) // Tutorial deck with mana curve
       const p2Deck = makeOrderedDeck(CARD_OPTIONS.P2, aiDeck)
 
       let p2 = {
