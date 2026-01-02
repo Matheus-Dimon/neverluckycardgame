@@ -20,6 +20,14 @@ public class GameController {
         return ResponseEntity.ok(game);
     }
 
+    @PostMapping("/invite-friend")
+    public ResponseEntity<GameDTO> inviteFriend(@RequestParam Long player1Id, @RequestParam Long friendId) {
+        // Verify they are friends (this would be checked in service)
+        GameDTO game = gameService.createGame(player1Id);
+        // Here you could store the invitation or notify the friend
+        return ResponseEntity.ok(game);
+    }
+
     @GetMapping("/{gameId}")
     public ResponseEntity<GameDTO> getGame(@PathVariable Long gameId) {
         GameDTO game = gameService.getGame(gameId);

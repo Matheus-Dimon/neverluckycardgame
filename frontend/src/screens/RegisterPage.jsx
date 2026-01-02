@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
+import { authAPI } from '../utils/api';
 import '../styles/styles.css';
 
 const RegisterPage = ({ onNavigateToLogin, onNavigateToHome }) => {
@@ -45,27 +46,12 @@ const RegisterPage = ({ onNavigateToLogin, onNavigateToHome }) => {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:3000/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: formData.username,
-          password: formData.password
-        })
-      });
-
-      if (response.ok) {
-        // Registration successful
-        alert(t('registrationSuccess'));
-        onNavigateToLogin();
-      } else {
-        const errorData = await response.text();
-        setError(errorData || t('registrationError'));
-      }
+      await authAPI.register(formData.username, formData.password);
+      // Registration successful
+      alert(t('registrationSuccess'));
+      onNavigateToLogin();
     } catch (error) {
-      setError(t('connectionError'));
+      setError(error.message || t('registrationError'));
     } finally {
       setLoading(false);
     }

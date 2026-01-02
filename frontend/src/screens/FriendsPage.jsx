@@ -1,54 +1,105 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
+import { friendAPI } from '../utils/api';
 import '../styles/styles.css';
 
 const FriendsPage = ({ onBack }) => {
   const { language, t } = useLanguage();
-  const [friends, setFriends] = useState([
-    { id: 1, username: 'PlayerOne', status: 'online' },
-    { id: 2, username: 'CardMaster', status: 'offline' },
-    { id: 3, username: 'WarLord', status: 'in-game' }
-  ]);
-  const [newFriendUsername, setNewFriendUsername] = useState('');
-  const [isAdding, setIsAdding] = useState(false);
+  const [friends, setFriends] = useState([]);
+  const [pendingRequests, setPendingRequests] = useState([]);
+  const [sentRequests, setSentRequests] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-  const handleAddFriend = async () => {
-    if (!newFriendUsername.trim()) return;
+  useEffect(() => {
+    loadFriendsData();
+  }, []);
 
-    setIsAdding(true);
-    // Simulate API call
-    setTimeout(() => {
-      const newFriend = {
-        id: friends.length + 1,
-        username: newFriendUsername.trim(),
-        status: 'offline'
-      };
-      setFriends([...friends, newFriend]);
-      setNewFriendUsername('');
-      setIsAdding(false);
-    }, 1000);
-  };
-
-  const handleRemoveFriend = (friendId) => {
-    setFriends(friends.filter(friend => friend.id !== friendId));
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'online': return '#4CAF50';
-      case 'in-game': return '#FF9800';
-      case 'offline': return '#757575';
-      default: return '#757575';
+  const loadFriendsData = async () => {
+    try {
+      setLoading(true);
+      const [friendsData, pendingData, sentData] = await Promise.all([
+        friendAPI.getFriends(),
+        friendAPI.getPendingRequests(),
+        friendAPI.getSentRequests()
+      ]);
+      setFriends(friendsData);
+      setPendingRequests(pendingData);
+      setSentRequests(sentData);
+    } catch (err) {
+      setError('Failed to load friends data');
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const getStatusText = (status) => {
-    switch (status) {
-      case 'online': return 'Online';
-      case 'in-game': return 'Em jogo';
-      case 'offline': return 'Offline';
-      default: return 'Offline';
+  const handleSearch = async (query) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
     }
+    try {
+      const results = await friendAPI.searchUsers(query);
+      setSearchResults(results);
+    } catch (err) {
+      console.error('Search failed:', err);
+    }
+  };
+
+  const handleSendRequest = async (userId) => {
+    try {
+      await friendAPI.sendFriendRequest(userId);
+      setSuccess('Friend request sent successfully!');
+      setSearchResults([]);
+      setSearchQuery('');
+      loadFriendsData(); // Refresh data
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleAcceptRequest = async (requestId) => {
+    try {
+      await friendAPI.acceptRequest(requestId);
+      setSuccess('Friend request accepted!');
+      loadFriendsData(); // Refresh data
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleRejectRequest = async (requestId) => {
+    try {
+      await friendAPI.rejectRequest(requestId);
+      setSuccess('Friend request rejected!');
+      loadFriendsData(); // Refresh data
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleRemoveFriend = async (friendId) => {
+    try {
+      await friendAPI.removeFriend(friendId);
+      setSuccess('Friend removed successfully!');
+      loadFriendsData(); // Refresh data
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleInviteFriend = (friendId) => {
+    // TODO: Implement game invitation
+    setError('Game invitation not implemented yet');
+  };
+
+  const clearMessages = () => {
+    setError('');
+    setSuccess('');
   };
 
   return (
@@ -73,15 +124,43 @@ const FriendsPage = ({ onBack }) => {
           </button>
         </div>
 
+        {error && (
+          <div style={{
+            background: '#ffebee',
+            color: '#c62828',
+            padding: '10px',
+            borderRadius: '4px',
+            marginBottom: '20px'
+          }}>
+            {error}
+            <button onClick={clearMessages} style={{ float: 'right', background: 'none', border: 'none', cursor: 'pointer' }}>×</button>
+          </div>
+        )}
+
+        {success && (
+          <div style={{
+            background: '#e8f5e8',
+            color: '#2e7d32',
+            padding: '10px',
+            borderRadius: '4px',
+            marginBottom: '20px'
+          }}>
+            {success}
+            <button onClick={clearMessages} style={{ float: 'right', background: 'none', border: 'none', cursor: 'pointer' }}>×</button>
+          </div>
+        )}
+
         <div className="add-friend-section">
-          <h3>Adicionar Amigo</h3>
+          <h3>Buscar Usuários</h3>
           <div className="add-friend-input">
             <input
               type="text"
               placeholder="Digite o nome de usuário..."
-              value={newFriendUsername}
-              onChange={(e) => setNewFriendUsername(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleAddFriend()}
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                handleSearch(e.target.value);
+              }}
               style={{
                 padding: '10px',
                 fontSize: '16px',
@@ -92,27 +171,98 @@ const FriendsPage = ({ onBack }) => {
                 flex: 1
               }}
             />
-            <button
-              onClick={handleAddFriend}
-              disabled={isAdding || !newFriendUsername.trim()}
-              style={{
-                padding: '10px 20px',
-                background: isAdding ? '#666' : '#8b5a2b',
-                color: 'white',
-                border: '2px solid #f5c06b',
-                borderRadius: '4px',
-                cursor: isAdding ? 'not-allowed' : 'pointer',
-                fontSize: '16px'
-              }}
-            >
-              {isAdding ? 'Adicionando...' : 'Adicionar'}
-            </button>
           </div>
+
+          {searchResults.length > 0 && (
+            <div className="search-results" style={{ marginTop: '10px' }}>
+              {searchResults.map(user => (
+                <div key={user.id} style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '8px',
+                  background: 'rgba(255,255,255,0.9)',
+                  borderRadius: '4px',
+                  marginBottom: '5px'
+                }}>
+                  <span>{user.username}</span>
+                  <button
+                    onClick={() => handleSendRequest(user.id)}
+                    style={{
+                      padding: '6px 12px',
+                      background: '#8b5a2b',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '14px'
+                    }}
+                  >
+                    Enviar Solicitação
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
+
+        {pendingRequests.length > 0 && (
+          <div className="pending-requests">
+            <h3>Solicitações Pendentes ({pendingRequests.length})</h3>
+            <div className="requests-list">
+              {pendingRequests.map(request => (
+                <div key={request.id} className="request-card" style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '10px',
+                  background: 'rgba(255,255,255,0.9)',
+                  borderRadius: '4px',
+                  marginBottom: '8px'
+                }}>
+                  <span>{request.sender.username}</span>
+                  <div>
+                    <button
+                      onClick={() => handleAcceptRequest(request.id)}
+                      style={{
+                        padding: '6px 12px',
+                        background: '#4CAF50',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        marginRight: '8px'
+                      }}
+                    >
+                      Aceitar
+                    </button>
+                    <button
+                      onClick={() => handleRejectRequest(request.id)}
+                      style={{
+                        padding: '6px 12px',
+                        background: '#f44336',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontSize: '14px'
+                      }}
+                    >
+                      Rejeitar
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="friends-list">
           <h3>Lista de Amigos ({friends.length})</h3>
-          {friends.length === 0 ? (
+          {loading ? (
+            <p style={{ textAlign: 'center', color: '#666' }}>Carregando...</p>
+          ) : friends.length === 0 ? (
             <p style={{ textAlign: 'center', color: '#666', fontStyle: 'italic' }}>
               Nenhum amigo adicionado ainda.
             </p>
@@ -125,30 +275,30 @@ const FriendsPage = ({ onBack }) => {
                     <div
                       className="friend-status"
                       style={{
-                        color: getStatusColor(friend.status),
+                        color: '#757575',
                         fontSize: '14px',
                         fontWeight: 'bold'
                       }}
                     >
-                      ● {getStatusText(friend.status)}
+                      ● Offline
                     </div>
                   </div>
                   <div className="friend-actions">
                     <button
                       className="invite-button"
-                      disabled={friend.status !== 'online'}
+                      onClick={() => handleInviteFriend(friend.id)}
                       style={{
                         padding: '6px 12px',
-                        background: friend.status === 'online' ? '#4CAF50' : '#666',
+                        background: '#666',
                         color: 'white',
                         border: 'none',
                         borderRadius: '4px',
-                        cursor: friend.status === 'online' ? 'pointer' : 'not-allowed',
+                        cursor: 'not-allowed',
                         fontSize: '14px',
                         marginRight: '8px'
                       }}
                     >
-                      Convidar
+                      Convidar (Em breve)
                     </button>
                     <button
                       className="remove-button"

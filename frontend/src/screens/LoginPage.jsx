@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
+import { authAPI } from '../utils/api';
 import '../styles/styles.css';
 
 const LoginPage = ({ onNavigateToRegister, onNavigateToHome, onLoginSuccess }) => {
@@ -34,29 +35,20 @@ const LoginPage = ({ onNavigateToRegister, onNavigateToHome, onLoginSuccess }) =
     setError('');
 
     try {
-      const response = await fetch('http://localhost:3000/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: formData.username,
-          password: formData.password
-        })
-      });
-
-      if (response.ok) {
-        // Login successful - store user info and navigate to game
-        localStorage.setItem('currentUser', JSON.stringify({
-          username: formData.username,
-          loggedIn: true
-        }));
-        onLoginSuccess();
-      } else {
-        setError(t('loginError'));
-      }
+      const data = await authAPI.login(formData.username, formData.password);
+      // Login successful - store user info and JWT token
+      localStorage.setItem('currentUser', JSON.stringify({
+        username: data.username,
+        loggedIn: true,
+        token: data.token
+      }));
+      onLoginSuccess();
     } catch (error) {
-      setError(t('connectionError'));
+      if (error.message === 'Invalid credentials') {
+        setError(t('loginError'));
+      } else {
+        setError(t('connectionError'));
+      }
     } finally {
       setLoading(false);
     }
