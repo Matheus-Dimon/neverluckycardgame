@@ -407,6 +407,10 @@ function reducer(state=initialState, action){
       return { ...state, gamePhase: 'START_MENU', tutorialMode: false };
     }
 
+    case 'GO_TO_FRIENDS': {
+      return { ...state, gamePhase: 'FRIENDS' };
+    }
+
     case 'GO_TO_LOGIN': {
       return { ...state, gamePhase: 'LOGIN_PAGE', tutorialMode: false };
     }

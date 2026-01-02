@@ -1853,6 +1853,176 @@ body{
   transform: translateY(-1px);
 }
 
+/* Friends Page Styles */
+.friends-page-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(180deg, rgba(7,16,40,0.95) 0%, rgba(11,23,48,0.98) 100%),
+              url('../images/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  padding: 20px;
+}
+
+.friends-page-content {
+  max-width: 800px;
+  width: 100%;
+  background: linear-gradient(135deg, rgba(30,41,59,0.95), rgba(15,23,42,0.98));
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+  border: 2px solid rgba(139,92,46,0.4);
+  backdrop-filter: blur(10px);
+}
+
+.friends-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.friends-header h1 {
+  color: #fbbf24;
+  font-size: 2.5em;
+  font-weight: 900;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+  margin: 0;
+}
+
+.back-button {
+  padding: 10px 20px;
+  background: rgba(0,0,0,0.7);
+  color: white;
+  border: 2px solid #f5c06b;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
+
+.back-button:hover {
+  background: rgba(0,0,0,0.9);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(245,192,107,0.3);
+}
+
+.add-friend-section {
+  background: rgba(0,0,0,0.2);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 30px;
+  border: 2px solid rgba(139,92,46,0.2);
+}
+
+.add-friend-section h3 {
+  color: #fbbf24;
+  margin: 0 0 15px 0;
+  font-size: 1.4em;
+  font-weight: 800;
+}
+
+.add-friend-input {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.friends-list {
+  margin-bottom: 20px;
+}
+
+.friends-list h3 {
+  color: #fbbf24;
+  margin: 0 0 20px 0;
+  font-size: 1.4em;
+  font-weight: 800;
+}
+
+.friends-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 15px;
+}
+
+.friend-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, rgba(15,23,42,0.8), rgba(30,41,59,0.6));
+  border-radius: 12px;
+  padding: 15px;
+  border: 2px solid rgba(139,92,46,0.2);
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.friend-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(245,192,107,0.4);
+  box-shadow: 0 8px 25px rgba(245,192,107,0.2);
+}
+
+.friend-info {
+  flex: 1;
+}
+
+.friend-name {
+  font-size: 1.2em;
+  font-weight: 800;
+  color: #fbbf24;
+  margin-bottom: 5px;
+}
+
+.friend-status {
+  font-size: 0.9em;
+  font-weight: bold;
+}
+
+.friend-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.invite-button, .remove-button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9em;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
+
+.invite-button {
+  background: #4CAF50;
+  color: white;
+}
+
+.invite-button:hover:not(:disabled) {
+  background: #45a049;
+  transform: translateY(-1px);
+}
+
+.invite-button:disabled {
+  background: #666;
+  cursor: not-allowed;
+}
+
+.remove-button {
+  background: #f44336;
+  color: white;
+}
+
+.remove-button:hover {
+  background: #d32f2f;
+  transform: translateY(-1px);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .homepage-content {
@@ -1882,5 +2052,43 @@ body{
 
   .login-form h2, .register-form h2 {
     font-size: 1.8em;
+  }
+
+  .friends-page-content {
+    padding: 20px;
+    margin: 20px;
+  }
+
+  .friends-header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+
+  .friends-header h1 {
+    font-size: 2em;
+  }
+
+  .friends-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .friend-card {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+
+  .friend-actions {
+    justify-content: center;
+  }
+
+  .add-friend-input {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  input[type="text"] {
+    width: 100%;
   }
 }

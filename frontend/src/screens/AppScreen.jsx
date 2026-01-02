@@ -7,6 +7,7 @@ import ErrorBoundary from '../components/ErrorBoundary'
 import GlobalErrorCatcher from '../components/GlobalErrorCatcher'
 import BackgroundMusic from '../components/BackgroundMusic'
 import StartMenu from './StartMenu'
+import FriendsPage from './FriendsPage'
 import Board from '../components/Board'
 
 function InnerApp({ tutorialMode, onLogout }) {
@@ -23,6 +24,15 @@ function InnerApp({ tutorialMode, onLogout }) {
     return (
       <>
         <StartMenu />
+        <BackgroundMusic />
+      </>
+    )
+  }
+
+  if (state.gamePhase === 'FRIENDS') {
+    return (
+      <>
+        <FriendsPage onBack={() => dispatch({ type: 'GO_TO_START_MENU' })} />
         <BackgroundMusic />
       </>
     )
