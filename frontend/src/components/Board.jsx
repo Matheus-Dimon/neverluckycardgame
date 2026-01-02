@@ -3,6 +3,7 @@ import Hero from './Hero'
 import BattlefieldLane from './BattlefieldLane'
 import Hand from './Hand'
 import { GameContext } from '../context/GameContext.jsx'
+import { useLanguage } from '../context/LanguageContext'
 import HeroPowerBadge from './HeroPowerBadge.jsx'
 import GameOverModal from './GameOverModal.jsx'
 import InstructionsPanel from './InstructionsPanel.jsx'
@@ -244,6 +245,7 @@ const playSound = (type) => {
 
 export default function Board() {
   const { state, dispatch } = useContext(GameContext)
+  const { t } = useLanguage()
   const { player1, player2, turn, animation, targeting, gameOver, winner, gameLog, tutorialMode, tutorialStep, tutorialHighlights, tutorialMessage } = state
 
   // Apply tutorial highlight classes
@@ -258,12 +260,12 @@ export default function Board() {
 
     // Get current step's UI lock settings
     const tutorialSteps = [
-      { uiLock: { enabledElements: [], disabledElements: ['all'] } }, // 0: interface_overview
-      { uiLock: { enabledElements: ['tutorial-card-0', 'battlefield-placement'], disabledElements: ['hero', 'end-turn', 'other-cards'] } }, // 1: play_card
-      { uiLock: { enabledElements: ['enemy-target'], disabledElements: ['hand', 'hero', 'end-turn', 'own-units'] } }, // 2: target_selection
-      { uiLock: { enabledElements: ['end-turn'], disabledElements: ['hand', 'battlefield', 'hero'] } }, // 3: turn_flow
-      { uiLock: { enabledElements: ['own-unit-attack', 'enemy-target'], disabledElements: ['hand', 'hero', 'end-turn'] } }, // 4: attacking
-      { uiLock: { enabledElements: [], disabledElements: ['all'] } } // 5: reinforcement_attack
+      { uiLock: { enabledElements: ['all'], disabledElements: [] } }, // 0: interface_overview
+      { uiLock: { enabledElements: ['all'], disabledElements: [] } }, // 1: play_card
+      { uiLock: { enabledElements: ['all'], disabledElements: [] } }, // 2: target_selection
+      { uiLock: { enabledElements: ['all'], disabledElements: [] } }, // 3: turn_flow
+      { uiLock: { enabledElements: ['all'], disabledElements: [] } }, // 4: attacking
+      { uiLock: { enabledElements: ['all'], disabledElements: [] } } // 5: reinforcement_attack
     ]
 
     const currentStep = tutorialSteps[tutorialStep]
@@ -905,9 +907,9 @@ export default function Board() {
       {targeting.active && targeting.playerUsing === 'player1' && (
         <div className="targeting-overlay">
           <div className="targeting-message">
-            Selecione um alvo para {targeting.power?.name}
+            {t('targeting.select_target', { powerName: targeting.power?.name })}
             <button className="btn-cancel" onClick={() => dispatch({type: 'CANCEL_TARGETING'})}>
-              Cancelar
+              {t('targeting.cancel')}
             </button>
           </div>
         </div>
@@ -916,9 +918,9 @@ export default function Board() {
       {targeting.healingActive && targeting.playerUsing === 'player1' && (
         <div className="targeting-overlay">
           <div className="targeting-message">
-            Selecione um alvo para curar
+            {t('targeting.select_heal_target')}
             <button className="btn-cancel" onClick={() => dispatch({type: 'CANCEL_TARGETING'})}>
-              Cancelar
+              {t('targeting.cancel')}
             </button>
           </div>
         </div>

@@ -15,89 +15,89 @@ export default function ImmersiveTutorial({ isOpen, onClose, onAdvanceTutorial, 
       // Step 0: Interface Overview - Highlights all major UI areas with continue button
       // Targets: .hand (CSS class), .lanes-vertical (CSS class), [data-hero="player1"] (data attribute), [data-hero="player1"] for mana
       id: 'interface_overview',
-      title: "Understanding the Interface",
-      message: "Welcome to NeverLucky! Let's explore the game interface. These are the key areas you'll use: your hand, the battlefield, your hero, and resource counters.",
+      title: t('tutorial.immersive_tutorial.interface_overview.title'),
+      message: t('tutorial.immersive_tutorial.interface_overview.message'),
       highlight: ['hand', 'battlefield', 'hero', 'mana'],
       position: 'center',
       arrow: null,
       requiresAction: true,
       canSkip: false,
       duration: 0,
-      uiLock: { enabledElements: [], disabledElements: ['all'] }
+      uiLock: { enabledElements: ['all'], disabledElements: [] }
     },
     {
       // Step 1: Playing a Card - Combined card selection and placement
       // Targets specific card in hand and battlefield lanes
       // Arrow points to first card in player's hand during tutorial
       id: 'play_card',
-      title: "Playing a Card",
-      message: "Select a card from your hand and place it on the battlefield. Click on the card to select it, then drag it to a valid placement zone on the battlefield.",
+      title: t('tutorial.immersive_tutorial.play_card.title'),
+      message: t('tutorial.immersive_tutorial.play_card.message'),
       highlight: ['tutorial-card-0', 'battlefield-placement'],
       position: 'center',
       arrow: { target: 'tutorial-card-0', direction: 'down' },
       requiresAction: true,
       canSkip: false,
       duration: 0,
-      uiLock: { enabledElements: ['tutorial-card-0', 'battlefield-placement'], disabledElements: ['hero', 'end-turn', 'other-cards'] }
+      uiLock: { enabledElements: ['all'], disabledElements: [] }
     },
     {
       // Step 3: Target Selection - Targets enemy units for attack targeting
       // Target: [data-card-id][data-player="player2"] (enemy cards with data attributes)
       // Arrow points to enemy units that appear on the battlefield
       id: 'target_selection',
-      title: "Target Selection",
-      message: "Click on the enemy unit that appears. A target is any enemy card or enemy player you want to affect.",
+      title: t('tutorial.immersive_tutorial.target_selection.title'),
+      message: t('tutorial.immersive_tutorial.target_selection.message'),
       highlight: ['enemy-target'],
       position: 'center',
       arrow: { target: 'enemy-target', direction: 'up' },
       requiresAction: true,
       canSkip: false,
       duration: 0,
-      uiLock: { enabledElements: ['enemy-target'], disabledElements: ['hand', 'hero', 'end-turn', 'own-units'] }
+      uiLock: { enabledElements: ['all'], disabledElements: [] }
     },
     {
       // Step 4: Turn Flow - Targets end turn button to complete tutorial
       // Target: [data-tutorial="end-turn"] (data attribute on end turn button)
       // Arrow points to end turn button to complete the turn sequence
       id: 'turn_flow',
-      title: "Turn Flow",
-      message: "Click 'End Turn' to complete your turn. Each turn follows this order: draw cards, gain mana, play cards, attack, then end turn.",
+      title: t('tutorial.immersive_tutorial.turn_flow.title'),
+      message: t('tutorial.immersive_tutorial.turn_flow.message'),
       highlight: ['end-turn'],
       position: 'center',
       arrow: { target: 'end-turn', direction: 'up' },
       requiresAction: true,
       canSkip: false,
       duration: 0,
-      uiLock: { enabledElements: ['end-turn'], disabledElements: ['hand', 'battlefield', 'hero'] }
+      uiLock: { enabledElements: ['all'], disabledElements: [] }
     },
     {
       // Step 5: Attacking - Targets player's own units for attack selection
       // Target: [data-card-id]:not([data-player="player2"]) (player's cards excluding enemy cards)
       // Arrow points to player's units that can be selected to attack
       id: 'reinforcement_attack',
-      title: "Attacking",
-      message: "Click on the card in the battlefield and select the target to attack.",
+      title: t('tutorial.immersive_tutorial.reinforcement_attack.title'),
+      message: t('tutorial.immersive_tutorial.reinforcement_attack.message'),
       highlight: ['own-unit-attack', 'enemy-target'],
       position: 'center',
       arrow: { target: 'own-unit-attack', direction: 'up' },
       requiresAction: true,
       canSkip: false,
       duration: 0,
-      uiLock: { enabledElements: ['own-unit-attack', 'enemy-target'], disabledElements: ['hand', 'hero', 'end-turn'] }
+      uiLock: { enabledElements: ['all'], disabledElements: [] }
     },
     {
       // Step 6: Tutorial Complete - Wait for opponent defeat
       // No targets - summary and conclusion of tutorial
       id: 'tutorial_complete',
-      title: "Tutorial Complete",
-      message: "Perfect! You've completed all the basic actions. Now defeat your opponent to finish the tutorial!",
+      title: t('tutorial.immersive_tutorial.tutorial_complete.title'),
+      message: t('tutorial.immersive_tutorial.tutorial_complete.message'),
       highlight: [],
       position: 'center',
       arrow: null,
       requiresAction: true,
       canSkip: false,
       duration: 0,
-      uiLock: { enabledElements: [], disabledElements: ['all'] }
+      uiLock: { enabledElements: ['all'], disabledElements: [] }
     }
   ]
 
@@ -569,7 +569,7 @@ export default function ImmersiveTutorial({ isOpen, onClose, onAdvanceTutorial, 
                 e.target.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)'
               }}
             >
-              Continuar
+              {t('tutorial.next')}
             </button>
           )}
 
@@ -604,7 +604,7 @@ export default function ImmersiveTutorial({ isOpen, onClose, onAdvanceTutorial, 
                 e.target.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)'
               }}
             >
-              Voltar para Menu
+              {t('tutorial.finish')}
             </button>
           )}
 
@@ -660,7 +660,7 @@ export default function ImmersiveTutorial({ isOpen, onClose, onAdvanceTutorial, 
             pointerEvents: 'auto'
           }}
         >
-          {t('tutorial.skip') || 'Skip Tutorial'}
+          {t('tutorial.skip')}
         </button>
       )}
 

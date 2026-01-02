@@ -54,8 +54,8 @@ const translations = {
     tutorial: {
       start: "Iniciar Tutorial",
       previous: "Anterior",
-      next: "Próximo",
-      finish: "Finalizar",
+      next: "Continuar",
+      finish: "Voltar para Menu",
       skip: "Pular Tutorial",
       game: {
         welcome: {
@@ -138,93 +138,29 @@ const translations = {
         }
       },
       immersive_tutorial: {
-        welcome: {
-          title: "Bem-vindo ao NeverLucky!",
-          message: "Este é um jogo de cartas onde você constrói seu exército e batalha contra seu oponente. Seu objetivo é reduzir os pontos de vida do herói inimigo a zero. Vamos aprender como jogar!"
-        },
-        interface: {
-          title: "Vamos explorar a interface",
-          message: "Veja as áreas principais do tabuleiro. Uma seta irá apontar para cada elemento importante."
-        },
-        hand: {
-          title: "Sua Mão",
-          message: "Estas são as cartas em sua mão. Cada carta mostra seu custo, ataque e defesa. Clique em uma carta para jogá-la!"
-        },
-        mana: {
-          title: "Cristais de Mana",
-          message: "Estes cristais brilhantes mostram sua mana. Você precisa de mana para jogar cartas. Você ganha 1 mais a cada turno, até 10!"
-        },
-        board: {
-          title: "Campo de Batalha",
-          message: "Unidades são colocadas em duas pistas: Corpo a corpo (combate próximo) e À distância (ataques longos). Unidades corpo a corpo podem atacar o herói inimigo se não houver unidades corpo a corpo inimigas bloqueando."
-        },
-        hero: {
-          title: "Seu Herói",
-          message: "Este é seu herói! Se seus pontos de vida chegarem a zero, você perde o jogo. Proteja-o com suas unidades!"
-        },
-        first_action: {
-          title: "Sua Primeira Ação: Comprar Cartas",
-          message: "No início de cada turno, você compra uma carta do seu deck. Isso dá mais opções para jogar!"
+        interface_overview: {
+          title: "Compreendendo a Interface",
+          message: "Bem-vindo ao NeverLucky! Vamos explorar a interface do jogo. Estas são as áreas principais que você usará: sua mão, o campo de batalha, seu herói e contadores de recursos."
         },
         play_card: {
-          title: "Jogando Sua Primeira Carta",
-          message: "Clique em uma carta em sua mão que custe menos ou igual à sua mana atual. Assista ela aparecer no campo de batalha!"
+          title: "Jogando uma Carta",
+          message: "Selecione uma carta da sua mão e coloque-a no campo de batalha. Clique na carta para selecioná-la, então arraste-a para uma zona de colocação válida no campo de batalha."
         },
-        card_costs: {
-          title: "Entendendo Custos e Efeitos das Cartas",
-          message: "Cada carta custa mana para jogar. Algumas cartas têm efeitos especiais quando jogadas, como causar dano ou curar aliados."
-        },
-        select_unit: {
-          title: "Passo 1: Clique na Carta para Selecionar",
-          message: "Clique em uma das suas unidades no campo de batalha para selecioná-la. Observe como ela fica destacada em azul quando selecionada!"
-        },
-        choose_target: {
-          title: "Passo 2: Clique no Alvo para Atacar",
-          message: "Agora clique em uma unidade inimiga ou no herói inimigo para executar o ataque. Sua unidade irá causar dano ao alvo selecionado!"
-        },
-        attack_execution: {
-          title: "Ataque Executado!",
-          message: "Excelente! Você completou seu primeiro ataque. As unidades podem atacar apenas uma vez por turno. Alguns inimigos podem contra-atacar!"
-        },
-        end_turn_guide: {
-          title: "Passo 3: Clique em 'End Turn'",
-          message: "Quando terminar suas ações, clique no botão 'End Turn' no canto inferior direito. Isso finaliza seu turno e deixa o oponente jogar!"
+        target_selection: {
+          title: "Seleção de Alvo",
+          message: "Clique na unidade inimiga que aparece. Um alvo é qualquer carta inimiga ou jogador inimigo que você deseja afetar."
         },
         turn_flow: {
-          title: "Fluxo Completo dos Turnos",
-          message: "Cada turno: Compre uma carta, ganhe mana, jogue cartas, use poderes de herói, ataque com unidades, então clique 'End Turn'. O jogo flui de um lado para o outro!"
+          title: "Fluxo dos Turnos",
+          message: "Clique em 'End Turn' para completar seu turno. Cada turno segue esta ordem: comprar cartas, ganhar mana, jogar cartas, atacar, então finalizar o turno."
         },
-        feedback: {
-          title: "Muito Bem!",
-          message: "Você está indo fantasticamente! Você aprendeu os conceitos básicos do NeverLucky. Continue praticando e você dominará o jogo em pouco tempo!"
+        reinforcement_attack: {
+          title: "Atacando",
+          message: "Clique na carta no campo de batalha e selecione o alvo para atacar."
         },
-        next_steps: {
-          title: "Pronto para Mais?",
-          message: "Agora você sabe como jogar! Tente uma partida completa contra a IA, ou desafie um amigo. Lembre-se: estratégia, timing e posicionamento de unidades são chave para a vitória!"
-        },
-        hero_powers_guide: {
-          title: "Poderes de Herói",
-          message: "Clique no botão do poder do herói abaixo do seu herói. Cada herói tem poderes únicos como causar dano, curar ou efeitos especiais. Você pode usá-lo uma vez por turno se tiver mana suficiente!"
-        },
-        cleric_mechanics: {
-          title: "Cura de Clérigos",
-          message: "Unidades clérigos curam em vez de atacar! Quando você seleciona um clérigo e clica em um aliado (ou seu herói), ele restaura vida em vez de causar dano. Perfeito para manter sua equipe viva!"
-        },
-        special_effects: {
-          title: "Efeitos Especiais das Cartas",
-          message: "Algumas cartas têm efeitos especiais: Grito de Batalha (ativa ao ser jogada), Investida (ataca imediatamente), Provocação (deve ser atacado primeiro), ou Imune Primeiro Turno (não pode ser danificado no turno em que foi jogada)!"
-        },
-        counter_attacks: {
-          title: "Contra-Ataques",
-          message: "Quando unidades corpo a corpo atacam umas às outras, ambas causam dano! O atacante acerta primeiro, então o defensor contra-ataca. Planeje suas trocas com cuidado!"
-        },
-        armor_system: {
-          title: "Proteção de Armadura",
-          message: "Alguns poderes de herói dão armadura! A armadura absorve dano antes de atingir a vida do herói. É uma proteção temporária que ajuda você a sobreviver mais!"
-        },
-        advanced_targeting: {
-          title: "Mirar Avançado",
-          message: "Poderes de herói que requerem alvos irão destacar opções válidas. Clique em unidades inimigas para poderes de dano, ou suas próprias unidades/heróis para poderes de cura. Mirar é crucial para poderes de herói efetivos!"
+        tutorial_complete: {
+          title: "Tutorial Completo",
+          message: "Perfeito! Você completou todas as ações básicas. Agora derrote seu oponente para finalizar o tutorial!"
         }
       }
     },
@@ -233,6 +169,13 @@ const translations = {
     gamelog: {
       empty: "Nenhuma ação ainda...",
       entries: "entradas"
+    },
+
+    // Targeting
+    targeting: {
+      select_target: "Selecione um alvo para {{powerName}}",
+      select_heal_target: "Selecione um alvo para curar",
+      cancel: "Cancelar"
     }
   },
   en: {
@@ -290,8 +233,8 @@ const translations = {
     tutorial: {
       start: "Start Tutorial",
       previous: "Previous",
-      next: "Next",
-      finish: "Finish",
+      next: "Continue",
+      finish: "Return to Menu",
       skip: "Skip Tutorial",
       game: {
         welcome: {
@@ -372,6 +315,32 @@ const translations = {
           title: "Heal Applied!",
           message: "Your unit healed an ally! Clerics can heal instead of attacking."
         }
+      },
+      immersive_tutorial: {
+        interface_overview: {
+          title: "Understanding the Interface",
+          message: "Welcome to NeverLucky! Let's explore the game interface. These are the key areas you'll use: your hand, the battlefield, your hero, and resource counters."
+        },
+        play_card: {
+          title: "Playing a Card",
+          message: "Select a card from your hand and place it on the battlefield. Click on the card to select it, then drag it to a valid placement zone on the battlefield."
+        },
+        target_selection: {
+          title: "Target Selection",
+          message: "Click on the enemy unit that appears. A target is any enemy card or enemy player you want to affect."
+        },
+        turn_flow: {
+          title: "Turn Flow",
+          message: "Click 'End Turn' to complete your turn. Each turn follows this order: draw cards, gain mana, play cards, attack, then end turn."
+        },
+        reinforcement_attack: {
+          title: "Attacking",
+          message: "Click on the card in the battlefield and select the target to attack."
+        },
+        tutorial_complete: {
+          title: "Tutorial Complete",
+          message: "Perfect! You've completed all the basic actions. Now defeat your opponent to finish the tutorial!"
+        }
       }
     },
 
@@ -379,6 +348,13 @@ const translations = {
     gamelog: {
       empty: "No actions yet...",
       entries: "entries"
+    },
+
+    // Targeting
+    targeting: {
+      select_target: "Select a target for {{powerName}}",
+      select_heal_target: "Select a target to heal",
+      cancel: "Cancel"
     }
   }
 };

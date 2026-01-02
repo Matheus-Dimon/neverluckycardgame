@@ -626,17 +626,7 @@ function reducer(state=initialState, action){
         turn: state.turnCount
       })
 
-      // Tutorial message for first hero power use
-      if (state.tutorialMode && playerKey === 'player1') {
-        const heroPowerEntries = state.gameLog.filter(entry => entry.type === 'hero_power' && entry.player === 'player1').length
-        if (heroPowerEntries === 0) { // This is the first hero power use
-          finalState = {
-            ...finalState,
-            tutorialMessage: 'Incrível! Você usou seu primeiro Poder do Herói. Ele pode ser usado uma vez por turno!',
-            tutorialMessageTimeout: Date.now()
-          }
-        }
-      }
+      // Tutorial message for first hero power use is handled automatically by DynamicTutorialMessages component
 
       return finalState
     }
