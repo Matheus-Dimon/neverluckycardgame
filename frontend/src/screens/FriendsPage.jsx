@@ -17,6 +17,11 @@ const FriendsPage = ({ onBack }) => {
 
   useEffect(() => {
     loadFriendsData();
+    // Refresh friends list every 10 seconds to update online status
+    const interval = setInterval(() => {
+      loadFriendsData();
+    }, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   const loadFriendsData = async () => {

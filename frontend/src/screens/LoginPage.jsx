@@ -39,6 +39,7 @@ const LoginPage = ({ onNavigateToRegister, onNavigateToHome, onLoginSuccess }) =
       // Login successful - store user info and JWT token
       localStorage.setItem('currentUser', JSON.stringify({
         username: data.username,
+        id: data.id,
         loggedIn: true,
         token: data.token
       }));

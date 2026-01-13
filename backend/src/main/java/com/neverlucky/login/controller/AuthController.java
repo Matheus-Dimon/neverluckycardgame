@@ -27,27 +27,49 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody User user) {
-        if (userService.findByUsername(user.getUsername()) != null) {
-            return ResponseEntity.badRequest().body("Username already exists");
+        try {
+            if (user.getUsername() == null || user.getUsername().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Username is required");
+            }
+            if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Password is required");
+            }
+            if (userService.findByUsername(user.getUsername()) != null) {
+                return ResponseEntity.badRequest().body("Username already exists");
+            }
+            userService.register(user);
+            return ResponseEntity.ok("User registered successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Registration failed: " + e.getMessage());
         }
-        userService.register(user);
-        return ResponseEntity.ok("User registered successfully");
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User user) {
-        System.out.println("Login attempt for user: " + user.getUsername());
-        if (userService.authenticate(user.getUsername(), user.getPassword())) {
-            System.out.println("Authentication successful for: " + user.getUsername());
-            userService.setOnlineStatus(user.getUsername(), true);
-            String token = jwtUtil.generateToken(user.getUsername());
-            Map<String, String> response = new HashMap<>();
-            response.put("token", token);
-            response.put("username", user.getUsername());
-            return ResponseEntity.ok(response);
-        } else {
-            System.out.println("Authentication failed for: " + user.getUsername());
-            return ResponseEntity.badRequest().body("Invalid credentials");
+        try {
+            if (user.getUsername() == null || user.getUsername().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Username is required");
+            }
+            if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Password is required");
+            }
+            System.out.println("Login attempt for user: " + user.getUsername());
+            if (userService.authenticate(user.getUsername(), user.getPassword())) {
+                System.out.println("Authentication successful for: " + user.getUsername());
+                User loggedInUser = userService.findByUsername(user.getUsername());
+                userService.setOnlineStatus(user.getUsername(), true);
+                String token = jwtUtil.generateToken(user.getUsername());
+                Map<String, Object> response = new HashMap<>();
+                response.put("token", token);
+                response.put("username", user.getUsername());
+                response.put("id", loggedInUser.getId());
+                return ResponseEntity.ok(response);
+            } else {
+                System.out.println("Authentication failed for: " + user.getUsername());
+                return ResponseEntity.badRequest().body("Invalid credentials");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Login failed: " + e.getMessage());
         }
     }
 

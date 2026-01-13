@@ -23,6 +23,9 @@ public class FriendController {
     private UserService userService;
 
     private User getCurrentUser(Authentication authentication) {
+        if (authentication == null) {
+            throw new RuntimeException("User not authenticated");
+        }
         String username = authentication.getName();
         return userService.findByUsername(username);
     }
@@ -36,22 +39,26 @@ public class FriendController {
 
     @PostMapping("/request/{receiverId}")
     public ResponseEntity<?> sendFriendRequest(@PathVariable Long receiverId, Authentication authentication) {
-        User sender = getCurrentUser(authentication);
-        User receiver = userService.findById(receiverId).orElse(null);
+        try {
+            User sender = getCurrentUser(authentication);
+            User receiver = userService.findById(receiverId).orElse(null);
 
-        if (receiver == null) {
-            return ResponseEntity.badRequest().body("User not found");
-        }
+            if (receiver == null) {
+                return ResponseEntity.badRequest().body("User not found");
+            }
 
-        if (sender.getId().equals(receiverId)) {
-            return ResponseEntity.badRequest().body("Cannot send friend request to yourself");
-        }
+            if (sender.getId().equals(receiverId)) {
+                return ResponseEntity.badRequest().body("Cannot send friend request to yourself");
+            }
 
-        var request = friendService.sendFriendRequest(sender, receiver);
-        if (request.isPresent()) {
-            return ResponseEntity.ok("Friend request sent");
-        } else {
-            return ResponseEntity.badRequest().body("Friend request already exists or users are already friends");
+            var request = friendService.sendFriendRequest(sender, receiver);
+            if (request.isPresent()) {
+                return ResponseEntity.ok("Friend request sent");
+            } else {
+                return ResponseEntity.badRequest().body("Friend request already exists or users are already friends");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Failed to send friend request: " + e.getMessage());
         }
     }
 
