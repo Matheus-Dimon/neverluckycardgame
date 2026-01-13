@@ -12,8 +12,12 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:5173") // For frontend
 public class AuthController {
+
+    @GetMapping("/test")
+    public ResponseEntity<String> test() {
+        return ResponseEntity.ok("Test endpoint works");
+    }
 
     @Autowired
     private UserService userService;
@@ -32,7 +36,9 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User user) {
+        System.out.println("Login attempt for user: " + user.getUsername());
         if (userService.authenticate(user.getUsername(), user.getPassword())) {
+            System.out.println("Authentication successful for: " + user.getUsername());
             userService.setOnlineStatus(user.getUsername(), true);
             String token = jwtUtil.generateToken(user.getUsername());
             Map<String, String> response = new HashMap<>();
@@ -40,6 +46,7 @@ public class AuthController {
             response.put("username", user.getUsername());
             return ResponseEntity.ok(response);
         } else {
+            System.out.println("Authentication failed for: " + user.getUsername());
             return ResponseEntity.badRequest().body("Invalid credentials");
         }
     }

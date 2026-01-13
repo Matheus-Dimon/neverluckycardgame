@@ -13,7 +13,8 @@ import java.util.function.Function;
 @Component
 public class JwtUtil {
 
-    private static final Key SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    private static final String SECRET_STRING = "mySecretKeyForJwtTokensThatIsLongEnoughToBeSecure123456789";
+    private static final Key SECRET_KEY = Keys.hmacShaKeyFor(SECRET_STRING.getBytes());
     private static final int JWT_EXPIRATION = 86400000; // 24 hours
 
     public String generateToken(String username) {
