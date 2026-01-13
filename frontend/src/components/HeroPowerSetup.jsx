@@ -4,7 +4,7 @@ import { GameContext } from '../context/GameContext'
 
 export default function HeroPowerSetup() {
   const { state, dispatch } = useContext(GameContext)
-  const pool = HERO_POWER_OPTIONS.P1
+  const pool = state.isMultiplayer ? HERO_POWER_OPTIONS.P2 : HERO_POWER_OPTIONS.P1
   const selected = state.selectedHeroPowers || []
 
   const toggle = (id) => {
@@ -20,7 +20,11 @@ export default function HeroPowerSetup() {
       alert('Escolha exatamente 2 poderes de herói para continuar!')
       return
     }
-    dispatch({ type: 'START_GAME' })
+    if (state.isMultiplayer) {
+      dispatch({ type: 'START_MULTIPLAYER_GAME' })
+    } else {
+      dispatch({ type: 'START_GAME' })
+    }
   }
 
   const getEffectDescription = (power) => {

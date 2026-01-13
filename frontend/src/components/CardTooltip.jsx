@@ -7,16 +7,16 @@ const CardTooltip = ({ card }) => {
   return (
     <div className="card-tooltip">
       <div className="card-tooltip-content">
-        <h3>{card.name}</h3>
-        <p>Type: {card.type.name}</p>
-        <p>Attack: {card.attack}</p>
-        <p>Health: {card.defense}</p>
+        <h3>{card.name || 'Unknown'}</h3>
+        <p>Type: {card.type && card.type.name ? card.type.name : 'Unknown'}</p>
+        <p>Attack: {card.attack || 0}</p>
+        <p>Health: {card.defense || 0}</p>
         {card.effects && card.effects.length > 0 && (
           <div>
             <strong>Ability:</strong>
             <ul>
               {card.effects.map((effect, index) => (
-                <li key={index}>{effect.description}</li>
+                <li key={index}>{effect.description || 'No description'}</li>
               ))}
             </ul>
           </div>

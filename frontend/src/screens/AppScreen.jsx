@@ -11,7 +11,11 @@ import FriendsPage from './FriendsPage'
 import Board from '../components/Board'
 
 function InnerApp({ tutorialMode, onLogout }) {
-  const { state, dispatch } = useContext(GameContext)
+  const context = useContext(GameContext)
+  if (!context) {
+    return <div>Loading...</div>
+  }
+  const { state, dispatch } = context
 
   // Start tutorial when component mounts in tutorial mode
   useEffect(() => {

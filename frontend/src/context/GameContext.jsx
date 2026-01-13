@@ -451,9 +451,18 @@ function reducer(state=initialState, action){
     case 'GO_TO_HERO_POWER_OPTIONS': {
       if (state.selectedDeckCards.length < 15) return state
 
+      // For multiplayer, go to hero power selection phase
       if (state.isMultiplayer) {
-        // For multiplayer, dispatch START_MULTIPLAYER_GAME instead
-        return reducer(state, { type: 'START_MULTIPLAYER_GAME' })
+        const p2Deck = makeOrderedDeck(CARD_OPTIONS.P2, state.selectedDeckCards)
+
+        return {
+          ...state,
+          gamePhase: 'HERO_POWER_OPTIONS',
+          player2: {
+            ...state.player2,
+            deck: p2Deck
+          }
+        }
       }
 
       // USA A ORDEM ESCOLHIDA - NÃO embaralha
@@ -633,7 +642,7 @@ function reducer(state=initialState, action){
       if (player.passiveSkills?.some(id => id.includes('atk_boost'))) {
         card.attack += 1
       }
-      if (card.type.lane === 'ranged' && player.passiveSkills?.some(id => id.includes('ranged_damage'))) {
+      if (card.type?.lane === 'ranged' && player.passiveSkills?.some(id => id.includes('ranged_damage'))) {
         card.attack += 1
       }
 
@@ -649,11 +658,11 @@ function reducer(state=initialState, action){
       }
 
       // Passiva de charge para melee
-      if (card.type.lane === 'melee' && player.passiveSkills?.some(id => id.includes('charge_melee'))) {
+      if (card.type?.lane === 'melee' && player.passiveSkills?.some(id => id.includes('charge_melee'))) {
         canAttack = true
       }
 
-      const lane = card.type.lane
+      const lane = card.type?.lane || 'melee'
       const field = safeLaneCopy(player.field)
 
       // IMPORTANTE: Immune não dá charge!
@@ -922,7 +931,7 @@ function reducer(state=initialState, action){
         })
 
         // CONTRA-ATAQUE: Se MELEE atacou MELEE, o atacante recebe dano de volta
-        if (attackerCard?.type.lane === 'melee' && targetCard?.type.lane === 'melee') {
+        if (attackerCard?.type?.lane === 'melee' && targetCard?.type?.lane === 'melee') {
           const counterDamage = targetCard.attack || 0
           attacker.field = applyDamageToField(attacker.field, attackerId, counterDamage, state.turnCount)
 
