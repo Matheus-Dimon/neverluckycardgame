@@ -28,9 +28,9 @@ export default function DeckSetup() {
       return
     }
 
-    if (state.isMultiplayer) {
+    if (state.isMultiplayer && state.gameId) {
       try {
-        // Submit to backend for multiplayer
+        // Submit to backend for online multiplayer
         const updatedGame = await gameAPI.selectDeck(state.gameId, state.currentPlayerKey, selected)
         // Update local state with the response
         dispatch({ type: 'UPDATE_GAME_STATE', payload: updatedGame })
@@ -42,6 +42,9 @@ export default function DeckSetup() {
       dispatch({ type: 'GO_TO_HERO_POWER_OPTIONS' })
     }
   }
+
+  // Check if we're waiting for the other player in multiplayer
+  const isWaitingForOtherPlayer = state.isMultiplayer && selected.length === 15
 
   const getEffectBadges = (effects) => {
     if (!effects || effects.length === 0) return null
@@ -70,8 +73,11 @@ export default function DeckSetup() {
       <div className="setup-header">
         <h2>⚔️ Monte seu Deck</h2>
         <p className={`setup-subtitle ${selected.length === 15 ? 'deck-complete' : ''}`}>
-          Escolha exatamente 15 cartas • {selected.length}/15 selecionadas
-          {selected.length === 15 && <span className="warning"> - Deck completo!</span>}
+          {isWaitingForOtherPlayer
+            ? "Aguardando o outro jogador..."
+            : `Escolha exatamente 15 cartas • ${selected.length}/15 selecionadas`
+          }
+          {selected.length === 15 && !isWaitingForOtherPlayer && <span className="warning"> - Deck completo!</span>}
         </p>
       </div>
 
@@ -161,10 +167,15 @@ export default function DeckSetup() {
       <div className="setup-footer">
         <button
           onClick={handleNext}
-          className={`btn btn-primary ${selected.length === 15 ? '' : 'btn-disabled'}`}
-          disabled={selected.length !== 15}
+          className={`btn btn-primary ${selected.length === 15 && !isWaitingForOtherPlayer ? '' : 'btn-disabled'}`}
+          disabled={selected.length !== 15 || isWaitingForOtherPlayer}
         >
-          {selected.length === 15 ? 'Próximo: Escolher Poderes →' : `Faltam ${15 - selected.length} cartas`}
+          {isWaitingForOtherPlayer
+            ? 'Aguardando o outro jogador...'
+            : selected.length === 15
+              ? 'Próximo: Escolher Poderes →'
+              : `Faltam ${15 - selected.length} cartas`
+          }
         </button>
       </div>
     </div>

@@ -17,14 +17,15 @@ export default function PassiveSkillsSetup() {
   }
 
   const handleNext = async () => {
+    console.log('handleNext called, selected:', selected, 'length:', selected.length)
     if (selected.length !== 3) {
       alert('Escolha exatamente 3 habilidades passivas!')
       return
     }
 
-    if (state.isMultiplayer) {
+    if (state.isMultiplayer && state.gameId) {
       try {
-        // Submit to backend for multiplayer
+        // Submit to backend for online multiplayer
         const updatedGame = await gameAPI.selectPassiveSkills(state.gameId, state.currentPlayerKey, selected)
         // Update local state with the response
         dispatch({ type: 'UPDATE_GAME_STATE', payload: updatedGame })
@@ -33,16 +34,23 @@ export default function PassiveSkillsSetup() {
         alert('Erro ao enviar habilidades passivas. Tente novamente.')
       }
     } else {
+      console.log('Dispatching GO_TO_DECK_SETUP')
       dispatch({ type: 'GO_TO_DECK_SETUP' })
     }
   }
+
+  // Check if we're waiting for the other player in multiplayer
+  const isWaitingForOtherPlayer = state.isMultiplayer && selected.length === 3
 
   return (
     <div className="passive-skills-setup">
       <div className="setup-header">
         <h2>⚡ Escolha Suas Habilidades Passivas</h2>
         <p className="setup-subtitle">
-          Escolha exatamente 3 habilidades • {selected.length}/3 selecionadas
+          {isWaitingForOtherPlayer
+            ? "Aguardando o outro jogador..."
+            : `Escolha exatamente 3 habilidades • ${selected.length}/3 selecionadas`
+          }
         </p>
         <p className="setup-note">
           Essas habilidades estarão ativas durante toda a partida

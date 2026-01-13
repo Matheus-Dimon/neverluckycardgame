@@ -22,9 +22,9 @@ export default function HeroPowerSetup() {
       return
     }
 
-    if (state.isMultiplayer) {
+    if (state.isMultiplayer && state.gameId) {
       try {
-        // Submit to backend for multiplayer
+        // Submit to backend for online multiplayer
         const updatedGame = await gameAPI.selectHeroPowers(state.gameId, state.currentPlayerKey, selected)
         // Update local state with the response
         dispatch({ type: 'UPDATE_GAME_STATE', payload: updatedGame })
@@ -32,10 +32,15 @@ export default function HeroPowerSetup() {
         console.error('Failed to submit hero powers:', error)
         alert('Erro ao enviar poderes de herói. Tente novamente.')
       }
+    } else if (state.isMultiplayer) {
+      dispatch({ type: 'START_MULTIPLAYER_GAME' })
     } else {
       dispatch({ type: 'START_GAME' })
     }
   }
+
+  // Check if we're waiting for the other player in multiplayer
+  const isWaitingForOtherPlayer = state.isMultiplayer && state.gameId && selected.length === 2
 
   const getEffectDescription = (power) => {
     switch(power.effect) {
@@ -52,7 +57,10 @@ export default function HeroPowerSetup() {
       <div className="setup-header">
         <h2>Escolha seus Poderes de Herói</h2>
         <p className="setup-subtitle">
-          Escolha exatamente 2 poderes • {selected.length} selecionados
+          {isWaitingForOtherPlayer
+            ? "Aguardando o outro jogador..."
+            : `Escolha exatamente 2 poderes • ${selected.length} selecionados`
+          }
         </p>
       </div>
 
@@ -83,12 +91,17 @@ export default function HeroPowerSetup() {
       </div>
 
       <div className="setup-footer">
-        <button 
-          onClick={handleStart} 
-          className={`btn btn-primary ${selected.length === 2 ? '' : 'btn-disabled'}`}
-          disabled={selected.length !== 2}
+        <button
+          onClick={handleStart}
+          className={`btn btn-primary ${selected.length === 2 && !isWaitingForOtherPlayer ? '' : 'btn-disabled'}`}
+          disabled={selected.length !== 2 || isWaitingForOtherPlayer}
         >
-          {selected.length === 2 ? 'Começar Jogo! 🎮' : `Escolha ${2 - selected.length} poder(es)`}
+          {isWaitingForOtherPlayer
+            ? 'Aguardando o outro jogador...'
+            : selected.length === 2
+              ? 'Começar Jogo! 🎮'
+              : `Escolha ${2 - selected.length} poder(es)`
+          }
         </button>
       </div>
     </div>

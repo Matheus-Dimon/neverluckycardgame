@@ -436,7 +436,12 @@ function reducer(state=initialState, action){
     }
 
     case 'GO_TO_DECK_SETUP': {
-      if (state.selectedPassiveSkills.length !== 3) return state
+      console.log('GO_TO_DECK_SETUP action, selectedPassiveSkills:', state.selectedPassiveSkills, 'length:', state.selectedPassiveSkills?.length)
+      if (state.selectedPassiveSkills.length !== 3) {
+        console.log('Not enough passive skills selected, returning current state')
+        return state
+      }
+      console.log('Transitioning to SETUP phase')
       return {...state, gamePhase: 'SETUP'}
     }
 
@@ -1715,6 +1720,36 @@ export function GameProvider({children}){
       dispatch({type: 'SET_AI_PROCESSING', payload: false})
     }
   }, [state.turn, state.isAITurnProcessing])
+
+  // Polling for multiplayer game updates
+  useEffect(() => {
+    if (state.isMultiplayer && state.gameId && state.currentPlayerKey) {
+      const pollInterval = setInterval(async () => {
+        try {
+          const gameData = await gameAPI.getGame(state.gameId)
+          // Check if the game state has changed (compare key fields)
+          const currentPhase = state.gamePhase
+          const newPhase = gameData.gamePhase
+          const currentTurn = state.turn
+          const newTurn = gameData.turn
+          const currentTurnCount = state.turnCount
+          const newTurnCount = gameData.turnCount
+
+          // Always update if phase changed, or if we're in setup phases (to catch opponent progress)
+          if (newPhase !== currentPhase || newTurn !== currentTurn || newTurnCount !== currentTurnCount ||
+              (currentPhase === 'PASSIVE_SKILLS' || currentPhase === 'SETUP' || currentPhase === 'HERO_POWER_OPTIONS')) {
+            console.log('Game state changed or in setup phase, updating:', { oldPhase: currentPhase, newPhase, oldTurn: currentTurn, newTurn, oldTurnCount: currentTurnCount, newTurnCount })
+            // Update the game state
+            dispatch({ type: 'UPDATE_GAME_STATE', payload: gameData })
+          }
+        } catch (error) {
+          console.error('Failed to poll game state:', error)
+        }
+      }, 2000) // Poll every 2 seconds
+
+      return () => clearInterval(pollInterval)
+    }
+  }, [state.isMultiplayer, state.gameId, state.currentPlayerKey, state.gamePhase, state.turn, state.turnCount, dispatch])
 
   // Handle tutorial advancement
   useEffect(() => {
