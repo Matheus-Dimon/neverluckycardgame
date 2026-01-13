@@ -88,6 +88,10 @@ public class GameService {
             throw new RuntimeException("Game invitation is not pending");
         }
 
+        if (!game.getInvitedUser().getId().equals(player2Id)) {
+            throw new RuntimeException("You are not authorized to accept this invitation");
+        }
+
         game.setPlayer2(player2);
         game.setStatus(Game.GameStatus.ACTIVE);
         game.setGamePhase(Game.GamePhase.PLAYING);

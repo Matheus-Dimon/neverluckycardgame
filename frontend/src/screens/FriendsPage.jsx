@@ -19,11 +19,11 @@ const FriendsPage = ({ onBack }) => {
 
   useEffect(() => {
     loadFriendsData();
-    // Refresh friends list every 10 seconds to update online status and check for active games
+    // Refresh friends list every 2 seconds to update online status and check for active games for faster multiplayer start
     const interval = setInterval(() => {
       loadFriendsData();
       checkForActiveGames();
-    }, 10000);
+    }, 2000);
     return () => clearInterval(interval);
   }, []);
 

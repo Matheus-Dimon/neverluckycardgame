@@ -1,9 +1,12 @@
 package com.neverlucky.login.controller;
 
 import com.neverlucky.login.dto.GameDTO;
+import com.neverlucky.login.model.User;
 import com.neverlucky.login.service.GameService;
+import com.neverlucky.login.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,6 +17,17 @@ public class GameController {
     @Autowired
     private GameService gameService;
 
+    @Autowired
+    private UserService userService;
+
+    private User getCurrentUser(Authentication authentication) {
+        if (authentication == null) {
+            throw new RuntimeException("User not authenticated");
+        }
+        String username = authentication.getName();
+        return userService.findByUsername(username);
+    }
+
     @PostMapping("/create")
     public ResponseEntity<GameDTO> createGame(@RequestParam Long player1Id) {
         GameDTO game = gameService.createGame(player1Id);
@@ -21,31 +35,51 @@ public class GameController {
     }
 
     @PostMapping("/invite-friend")
-    public ResponseEntity<GameDTO> inviteFriend(@RequestParam Long player1Id, @RequestParam Long friendId) {
+    public ResponseEntity<GameDTO> inviteFriend(@RequestParam Long player1Id, @RequestParam Long friendId, Authentication authentication) {
+        User currentUser = getCurrentUser(authentication);
+        if (!currentUser.getId().equals(player1Id)) {
+            return ResponseEntity.status(403).body(null);
+        }
         GameDTO game = gameService.inviteFriend(player1Id, friendId);
         return ResponseEntity.ok(game);
     }
 
     @PostMapping("/{gameId}/accept-invite")
-    public ResponseEntity<GameDTO> acceptInvite(@PathVariable Long gameId, @RequestParam Long player2Id) {
+    public ResponseEntity<GameDTO> acceptInvite(@PathVariable Long gameId, @RequestParam Long player2Id, Authentication authentication) {
+        User currentUser = getCurrentUser(authentication);
+        if (!currentUser.getId().equals(player2Id)) {
+            return ResponseEntity.status(403).body(null);
+        }
         GameDTO game = gameService.acceptInvite(gameId, player2Id);
         return ResponseEntity.ok(game);
     }
 
     @PostMapping("/{gameId}/decline-invite")
-    public ResponseEntity<GameDTO> declineInvite(@PathVariable Long gameId, @RequestParam Long playerId) {
+    public ResponseEntity<GameDTO> declineInvite(@PathVariable Long gameId, @RequestParam Long playerId, Authentication authentication) {
+        User currentUser = getCurrentUser(authentication);
+        if (!currentUser.getId().equals(playerId)) {
+            return ResponseEntity.status(403).body(null);
+        }
         GameDTO game = gameService.declineInvite(gameId, playerId);
         return ResponseEntity.ok(game);
     }
 
     @GetMapping("/pending-invites/{userId}")
-    public ResponseEntity<java.util.List<GameDTO>> getPendingInvites(@PathVariable Long userId) {
+    public ResponseEntity<java.util.List<GameDTO>> getPendingInvites(@PathVariable Long userId, Authentication authentication) {
+        User currentUser = getCurrentUser(authentication);
+        if (!currentUser.getId().equals(userId)) {
+            return ResponseEntity.status(403).build();
+        }
         java.util.List<GameDTO> invites = gameService.getPendingInvites(userId);
         return ResponseEntity.ok(invites);
     }
 
     @GetMapping("/active-games/{userId}")
-    public ResponseEntity<java.util.List<GameDTO>> getActiveGamesForUser(@PathVariable Long userId) {
+    public ResponseEntity<java.util.List<GameDTO>> getActiveGamesForUser(@PathVariable Long userId, Authentication authentication) {
+        User currentUser = getCurrentUser(authentication);
+        if (!currentUser.getId().equals(userId)) {
+            return ResponseEntity.status(403).build();
+        }
         java.util.List<GameDTO> games = gameService.getActiveGamesForUser(userId);
         return ResponseEntity.ok(games);
     }
