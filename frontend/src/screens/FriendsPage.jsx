@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useLanguage } from '../context/LanguageContext';
+import { GameContext } from '../context/GameContext';
 import { friendAPI, gameAPI } from '../utils/api';
 import '../styles/styles.css';
 
 const FriendsPage = ({ onBack }) => {
   const { language, t } = useLanguage();
+  const { dispatch } = useContext(GameContext);
   const [friends, setFriends] = useState([]);
   const [pendingRequests, setPendingRequests] = useState([]);
   const [sentRequests, setSentRequests] = useState([]);
@@ -127,8 +129,10 @@ const FriendsPage = ({ onBack }) => {
         return;
       }
       await gameAPI.acceptInvite(gameId, userId);
-      setSuccess('Game invitation accepted! Starting game...');
+      setSuccess('Game invitation accepted! Setting up game...');
       loadFriendsData(); // Refresh data
+      // Start multiplayer setup
+      dispatch({ type: 'START_MULTIPLAYER_SETUP' });
     } catch (err) {
       setError('Failed to accept game invitation: ' + err.message);
     }

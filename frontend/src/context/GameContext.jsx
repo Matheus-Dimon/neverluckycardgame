@@ -42,6 +42,7 @@ const initialState = {
   selectedPassiveSkillsP2: [],
   selectedDeckCardsP2: [],
   selectedHeroPowersP2: [],
+  isMultiplayer: false,
   targeting: { active: false, playerUsing: null, power: null, healingActive: false, healerId: null, healAmount: 0 },
   healingTarget: { active: false, healerId: null, healAmount: 0 },
   animation: { active: false, element: null, startRect: null, endRect: null, callbackAction: null },
@@ -419,11 +420,18 @@ function reducer(state=initialState, action){
       return { ...state, gamePhase: 'PASSIVE_SKILLS' };
     }
 
+    case 'START_MULTIPLAYER_SETUP': {
+      return { ...state, gamePhase: 'PASSIVE_SKILLS', isMultiplayer: true };
+    }
+
     case 'GO_TO_DECK_SETUP_DIRECT': {
       return {...state, gamePhase: 'SETUP', selectedPassiveSkills: []};
     }
 
     case 'SET_SELECTED_PASSIVE_SKILLS': {
+      if (state.isMultiplayer) {
+        return {...state, selectedPassiveSkills: action.payload}
+      }
       return {...state, selectedPassiveSkills: action.payload}
     }
 
@@ -442,16 +450,37 @@ function reducer(state=initialState, action){
 
     case 'GO_TO_HERO_POWER_OPTIONS': {
       if (state.selectedDeckCards.length < 15) return state
-      
+
+      if (state.isMultiplayer) {
+        // For multiplayer, dispatch START_MULTIPLAYER_GAME instead
+        return reducer(state, { type: 'START_MULTIPLAYER_GAME' })
+      }
+
       // USA A ORDEM ESCOLHIDA - NÃO embaralha
       const p1Deck = makeOrderedDeck(CARD_OPTIONS.P1, state.selectedDeckCards)
-      
+
       return {
-        ...state, 
+        ...state,
         gamePhase: 'HERO_POWER_OPTIONS',
         player1: {
           ...state.player1,
           deck: p1Deck
+        }
+      }
+    }
+
+    case 'GO_TO_HERO_POWER_OPTIONS_P2': {
+      if (state.selectedDeckCards.length < 15) return state
+
+      // For player2 setup in multiplayer
+      const p2Deck = makeOrderedDeck(CARD_OPTIONS.P2, state.selectedDeckCards)
+
+      return {
+        ...state,
+        gamePhase: 'HERO_POWER_OPTIONS',
+        player2: {
+          ...state.player2,
+          deck: p2Deck
         }
       }
     }
@@ -512,6 +541,71 @@ function reducer(state=initialState, action){
       draw(p2, startHandP2)
 
       return {...state, player1: p1, player2: p2, gamePhase: 'PLAYING', turnCount: 1, selectedPassiveSkillsP2: aiPassives, selectedDeckCardsP2: aiDeckCards, selectedHeroPowersP2: aiPowers}
+    }
+
+    case 'START_MULTIPLAYER_GAME': {
+      if (state.selectedHeroPowers.length < 2) return state
+
+      // For multiplayer, assume player1 has the same setup as player2 would have
+      // In a full implementation, player1 would set up remotely
+      // For now, use AI selections for player1 and player2 setup for player2
+
+      const p1Passives = selectAIPassives() // Placeholder for player1 setup
+      const p1DeckCards = selectAIDeck()
+      const p1Powers = selectAIPowers()
+
+      const p2Powers = state.selectedHeroPowers.map(powerId => {
+        const power = HERO_POWER_OPTIONS.P2.find(p => p.id === powerId)
+        return {...power}
+      })
+
+      // Ordered decks
+      const p1Deck = makeOrderedDeck(CARD_OPTIONS.P1, p1DeckCards)
+      const p2Deck = makeOrderedDeck(CARD_OPTIONS.P2, state.selectedDeckCards)
+
+      let p1 = {
+        ...state.player1,
+        heroPowers: p1Powers.map(powerId => {
+          const power = HERO_POWER_OPTIONS.P1.find(p => p.id === powerId)
+          return {...power}
+        }),
+        deck: p1Deck,
+        passiveSkills: p1Passives,
+        hand: [],
+      }
+
+      let p2 = {
+        ...state.player2,
+        heroPowers: p2Powers,
+        deck: p2Deck,
+        passiveSkills: state.selectedPassiveSkills,
+        hand: [],
+      }
+
+      // Apply passive effects
+      p1 = applyPassiveEffects(p1, p1Passives)
+      p2 = applyPassiveEffects(p2, state.selectedPassiveSkills)
+
+      const draw = (p, n) => {
+        const drawn = p.deck.slice(0, n).map(c => ({...c, id: `${c.id}_${Date.now()}_${Math.random()}`}))
+        p.hand = [...p.hand, ...drawn]
+        p.deck = p.deck.slice(n)
+      }
+
+      draw(p1, 4)
+      draw(p2, 4) // Both start with 4 cards in multiplayer
+
+      return {
+        ...state,
+        player1: p1,
+        player2: p2,
+        gamePhase: 'PLAYING',
+        turnCount: 1,
+        isMultiplayer: true,
+        selectedPassiveSkillsP2: state.selectedPassiveSkills,
+        selectedDeckCardsP2: state.selectedDeckCards,
+        selectedHeroPowersP2: state.selectedHeroPowers
+      }
     }
 
     case 'PLAY_CARD': {
@@ -1116,7 +1210,7 @@ export function GameProvider({children}){
   }, [state.tutorialMessageTimeout])
 
   useEffect(() => {
-    if (state.turn !== 2 || state.gamePhase !== 'PLAYING' || state.isAITurnProcessing || state.gameOver) return
+    if (state.turn !== 2 || state.gamePhase !== 'PLAYING' || state.isAITurnProcessing || state.gameOver || state.isMultiplayer) return
 
     let cancelled = false
     const delay = ms => new Promise(r => setTimeout(r, ms))
