@@ -1,6 +1,7 @@
 import React, { useContext } from 'react'
 import { HERO_PASSIVE_OPTIONS } from '../utils/constants.js'
 import { GameContext } from '../context/GameContext.jsx'
+import { gameAPI } from '../utils/api.js'
 
 export default function PassiveSkillsSetup() {
   const { state, dispatch } = useContext(GameContext)
@@ -15,12 +16,25 @@ export default function PassiveSkillsSetup() {
     dispatch({ type: 'SET_SELECTED_PASSIVE_SKILLS', payload: newSelected })
   }
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (selected.length !== 3) {
       alert('Escolha exatamente 3 habilidades passivas!')
       return
     }
-    dispatch({ type: 'GO_TO_DECK_SETUP' })
+
+    if (state.isMultiplayer) {
+      try {
+        // Submit to backend for multiplayer
+        const updatedGame = await gameAPI.selectPassiveSkills(state.gameId, state.currentPlayerKey, selected)
+        // Update local state with the response
+        dispatch({ type: 'UPDATE_GAME_STATE', payload: updatedGame })
+      } catch (error) {
+        console.error('Failed to submit passive skills:', error)
+        alert('Erro ao enviar habilidades passivas. Tente novamente.')
+      }
+    } else {
+      dispatch({ type: 'GO_TO_DECK_SETUP' })
+    }
   }
 
   return (

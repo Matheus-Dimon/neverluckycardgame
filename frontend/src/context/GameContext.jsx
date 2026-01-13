@@ -448,6 +448,88 @@ function reducer(state=initialState, action){
       return {...state, selectedHeroPowers: action.payload}
     }
 
+
+
+    case 'UPDATE_GAME_STATE': {
+      const gameData = action.payload
+      // Convert backend game data to frontend format (similar to LOAD_MULTIPLAYER_GAME)
+      const convertPlayerState = (backendState, isPlayer1) => {
+        const cardOptions = isPlayer1 ? CARD_OPTIONS.P1 : CARD_OPTIONS.P2
+        const heroOptions = isPlayer1 ? HERO_POWER_OPTIONS.P1 : HERO_POWER_OPTIONS.P2
+
+        return {
+          hp: backendState.hp,
+          mana: backendState.mana,
+          maxMana: backendState.maxMana,
+          armor: backendState.armor,
+          hand: backendState.hand ? backendState.hand.map(card => ({
+            ...card,
+            id: card.uniqueId,
+            type: { lane: card.lane, name: card.unitType === 'WARRIOR' ? 'Guerreiro' : 'Clérigo' }
+          })) : [],
+          deck: backendState.deck ? backendState.deck.map(card => ({
+            ...card,
+            id: card.uniqueId,
+            type: { lane: card.lane, name: card.unitType === 'WARRIOR' ? 'Guerreiro' : 'Clérigo' }
+          })) : [],
+          field: {
+            melee: backendState.meleeField ? backendState.meleeField.map(card => ({
+              ...card,
+              id: card.uniqueId,
+              type: { lane: card.lane, name: card.unitType === 'WARRIOR' ? 'Guerreiro' : 'Clérigo' }
+            })) : [],
+            ranged: backendState.rangedField ? backendState.rangedField.map(card => ({
+              ...card,
+              id: card.uniqueId,
+              type: { lane: card.lane, name: card.unitType === 'WARRIOR' ? 'Guerreiro' : 'Clérigo' }
+            })) : []
+          },
+          heroPowers: backendState.heroPowers ? backendState.heroPowers.map(powerId => {
+            const power = heroOptions.find(p => p.id === powerId)
+            return power ? {...power} : { id: powerId, name: 'Unknown', effect: 'damage', cost: 2, amount: 1 }
+          }) : [],
+          hasUsedHeroPower: backendState.hasUsedHeroPower,
+          passiveSkills: backendState.passiveSkills || []
+        }
+      }
+
+      let player1, player2, turn, gamePhase
+
+      // Determine the game phase based on backend data
+      const backendPhase = gameData.gamePhase
+      if (backendPhase === 'PASSIVE_SKILLS') {
+        gamePhase = 'PASSIVE_SKILLS'
+      } else if (backendPhase === 'SETUP') {
+        gamePhase = 'SETUP'
+      } else if (backendPhase === 'HERO_POWER_OPTIONS') {
+        gamePhase = 'HERO_POWER_OPTIONS'
+      } else {
+        gamePhase = 'PLAYING'
+      }
+
+      if (state.currentPlayerKey === 'player1') {
+        player1 = convertPlayerState(gameData.player1State, true)
+        player2 = convertPlayerState(gameData.player2State, false)
+        turn = gameData.turn ? gameData.turn.toLowerCase() : '1'
+      } else {
+        // If current user is player2, swap the players so player1 is always the current user
+        player1 = convertPlayerState(gameData.player2State, false)
+        player2 = convertPlayerState(gameData.player1State, true)
+        turn = gameData.turn ? (gameData.turn.toLowerCase() === 'player1' ? 'player2' : 'player1') : '1'
+      }
+
+      return {
+        ...state,
+        player1,
+        player2,
+        gamePhase,
+        turn,
+        turnCount: gameData.turnCount || 1,
+        gameOver: gameData.gameOver || false,
+        winner: gameData.winner
+      }
+    }
+
     case 'GO_TO_HERO_POWER_OPTIONS': {
       if (state.selectedDeckCards.length < 15) return state
 
@@ -630,58 +712,71 @@ function reducer(state=initialState, action){
           mana: backendState.mana,
           maxMana: backendState.maxMana,
           armor: backendState.armor,
-          hand: backendState.hand.map(card => ({
+          hand: backendState.hand ? backendState.hand.map(card => ({
             ...card,
             id: card.uniqueId,
             type: { lane: card.lane, name: card.unitType === 'WARRIOR' ? 'Guerreiro' : 'Clérigo' }
-          })),
-          deck: backendState.deck.map(card => ({
+          })) : [],
+          deck: backendState.deck ? backendState.deck.map(card => ({
             ...card,
             id: card.uniqueId,
             type: { lane: card.lane, name: card.unitType === 'WARRIOR' ? 'Guerreiro' : 'Clérigo' }
-          })),
+          })) : [],
           field: {
-            melee: backendState.meleeField.map(card => ({
+            melee: backendState.meleeField ? backendState.meleeField.map(card => ({
               ...card,
               id: card.uniqueId,
               type: { lane: card.lane, name: card.unitType === 'WARRIOR' ? 'Guerreiro' : 'Clérigo' }
-            })),
-            ranged: backendState.rangedField.map(card => ({
+            })) : [],
+            ranged: backendState.rangedField ? backendState.rangedField.map(card => ({
               ...card,
               id: card.uniqueId,
               type: { lane: card.lane, name: card.unitType === 'WARRIOR' ? 'Guerreiro' : 'Clérigo' }
-            }))
+            })) : []
           },
-          heroPowers: backendState.heroPowers.map(powerId => {
+          heroPowers: backendState.heroPowers ? backendState.heroPowers.map(powerId => {
             const power = heroOptions.find(p => p.id === powerId)
             return power ? {...power} : { id: powerId, name: 'Unknown', effect: 'damage', cost: 2, amount: 1 }
-          }),
+          }) : [],
           hasUsedHeroPower: backendState.hasUsedHeroPower,
           passiveSkills: backendState.passiveSkills || []
         }
       }
 
-      let player1, player2, turn
+      let player1, player2, turn, gamePhase
+
+      // Determine the game phase based on backend data
+      const backendPhase = gameData.gamePhase
+      if (backendPhase === 'PASSIVE_SKILLS') {
+        gamePhase = 'PASSIVE_SKILLS'
+      } else if (backendPhase === 'SETUP') {
+        gamePhase = 'SETUP'
+      } else if (backendPhase === 'HERO_POWER_OPTIONS') {
+        gamePhase = 'HERO_POWER_OPTIONS'
+      } else {
+        gamePhase = 'PLAYING'
+      }
 
       if (playerKey === 'player1') {
         player1 = convertPlayerState(gameData.player1State, true)
         player2 = convertPlayerState(gameData.player2State, false)
-        turn = gameData.turn.toLowerCase()
+        turn = gameData.turn ? gameData.turn.toLowerCase() : '1'
       } else {
         // If current user is player2, swap the players so player1 is always the current user
         player1 = convertPlayerState(gameData.player2State, false)
         player2 = convertPlayerState(gameData.player1State, true)
-        turn = gameData.turn.toLowerCase() === 'player1' ? 'player2' : 'player1'
+        turn = gameData.turn ? (gameData.turn.toLowerCase() === 'player1' ? 'player2' : 'player1') : '1'
       }
 
       return {
         ...state,
+        gameId: gameData.id,
         player1,
         player2,
-        gamePhase: 'PLAYING',
+        gamePhase,
         turn,
-        turnCount: gameData.turnCount,
-        gameOver: gameData.gameOver,
+        turnCount: gameData.turnCount || 1,
+        gameOver: gameData.gameOver || false,
         winner: gameData.winner,
         isMultiplayer: true,
         currentPlayerKey: playerKey

@@ -1,6 +1,7 @@
 import React, { useContext } from 'react'
 import { HERO_POWER_OPTIONS } from '../utils/constants.js'
 import { GameContext } from '../context/GameContext'
+import { gameAPI } from '../utils/api.js'
 
 export default function HeroPowerSetup() {
   const { state, dispatch } = useContext(GameContext)
@@ -15,13 +16,22 @@ export default function HeroPowerSetup() {
     dispatch({ type: 'SET_SELECTED_HERO_POWERS', payload: newSelected })
   }
 
-  const handleStart = () => {
+  const handleStart = async () => {
     if (selected.length < 2) {
       alert('Escolha exatamente 2 poderes de herói para continuar!')
       return
     }
+
     if (state.isMultiplayer) {
-      dispatch({ type: 'START_MULTIPLAYER_GAME' })
+      try {
+        // Submit to backend for multiplayer
+        const updatedGame = await gameAPI.selectHeroPowers(state.gameId, state.currentPlayerKey, selected)
+        // Update local state with the response
+        dispatch({ type: 'UPDATE_GAME_STATE', payload: updatedGame })
+      } catch (error) {
+        console.error('Failed to submit hero powers:', error)
+        alert('Erro ao enviar poderes de herói. Tente novamente.')
+      }
     } else {
       dispatch({ type: 'START_GAME' })
     }

@@ -28,6 +28,18 @@ public class GameController {
         return userService.findByUsername(username);
     }
 
+    private boolean isPlayerInGame(User user, Long gameId, String playerKey) {
+        GameDTO game = gameService.getGame(gameId);
+        if (game == null) return false;
+
+        if ("player1".equals(playerKey) && game.getPlayer1Id() != null) {
+            return game.getPlayer1Id().equals(user.getId());
+        } else if ("player2".equals(playerKey) && game.getPlayer2Id() != null) {
+            return game.getPlayer2Id().equals(user.getId());
+        }
+        return false;
+    }
+
     @PostMapping("/create")
     public ResponseEntity<GameDTO> createGame(@RequestParam Long player1Id) {
         GameDTO game = gameService.createGame(player1Id);
@@ -134,24 +146,42 @@ public class GameController {
     @PostMapping("/{gameId}/select-passive-skills")
     public ResponseEntity<GameDTO> selectPassiveSkills(
             @PathVariable Long gameId,
-            @RequestBody java.util.List<String> passiveSkills) {
-        GameDTO game = gameService.selectPassiveSkills(gameId, passiveSkills);
+            @RequestParam String playerKey,
+            @RequestBody java.util.List<String> passiveSkills,
+            Authentication authentication) {
+        User currentUser = getCurrentUser(authentication);
+        if (!isPlayerInGame(currentUser, gameId, playerKey)) {
+            return ResponseEntity.status(403).body(null);
+        }
+        GameDTO game = gameService.selectPassiveSkills(gameId, playerKey, passiveSkills);
         return ResponseEntity.ok(game);
     }
 
     @PostMapping("/{gameId}/select-deck")
     public ResponseEntity<GameDTO> selectDeck(
             @PathVariable Long gameId,
-            @RequestBody java.util.List<String> deckCards) {
-        GameDTO game = gameService.selectDeck(gameId, deckCards);
+            @RequestParam String playerKey,
+            @RequestBody java.util.List<String> deckCards,
+            Authentication authentication) {
+        User currentUser = getCurrentUser(authentication);
+        if (!isPlayerInGame(currentUser, gameId, playerKey)) {
+            return ResponseEntity.status(403).body(null);
+        }
+        GameDTO game = gameService.selectDeck(gameId, playerKey, deckCards);
         return ResponseEntity.ok(game);
     }
 
     @PostMapping("/{gameId}/select-hero-powers")
     public ResponseEntity<GameDTO> selectHeroPowers(
             @PathVariable Long gameId,
-            @RequestBody java.util.List<String> heroPowers) {
-        GameDTO game = gameService.selectHeroPowers(gameId, heroPowers);
+            @RequestParam String playerKey,
+            @RequestBody java.util.List<String> heroPowers,
+            Authentication authentication) {
+        User currentUser = getCurrentUser(authentication);
+        if (!isPlayerInGame(currentUser, gameId, playerKey)) {
+            return ResponseEntity.status(403).body(null);
+        }
+        GameDTO game = gameService.selectHeroPowers(gameId, playerKey, heroPowers);
         return ResponseEntity.ok(game);
     }
 }

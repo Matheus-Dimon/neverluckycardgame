@@ -94,10 +94,9 @@ public class GameService {
 
         game.setPlayer2(player2);
         game.setStatus(Game.GameStatus.ACTIVE);
-        game.setGamePhase(Game.GamePhase.PLAYING);
+        game.setGamePhase(Game.GamePhase.PASSIVE_SKILLS);
 
-        // Initialize decks with default cards for multiplayer
-        initializeDecksForMultiplayer(game);
+        // Don't initialize decks yet - let players go through setup phases
 
         game = gameRepository.save(game);
         return convertToDTO(game);
@@ -471,15 +470,22 @@ public class GameService {
         return null;
     }
 
-    public GameDTO selectPassiveSkills(Long gameId, List<String> passiveSkills) {
+    public GameDTO selectPassiveSkills(Long gameId, String playerKey, List<String> passiveSkills) {
         if (gameId == null) {
             throw new IllegalArgumentException("Game ID cannot be null");
         }
         Game game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new RuntimeException("Game not found"));
 
-        // For now, assume player1 is selecting passive skills (can be extended for player2)
-        PlayerState playerState = game.getPlayer1State();
+        PlayerState playerState;
+        if ("player1".equals(playerKey)) {
+            playerState = game.getPlayer1State();
+        } else if ("player2".equals(playerKey)) {
+            playerState = game.getPlayer2State();
+        } else {
+            throw new RuntimeException("Invalid player key");
+        }
+
         if (playerState == null) {
             throw new RuntimeException("Player state not found");
         }
@@ -487,19 +493,32 @@ public class GameService {
         // Set passive skills
         playerState.setPassiveSkills(passiveSkills);
 
+        // Check if both players have completed passive skills setup
+        if (hasPlayerCompletedSetup(game.getPlayer1State(), Game.GamePhase.PASSIVE_SKILLS) &&
+            hasPlayerCompletedSetup(game.getPlayer2State(), Game.GamePhase.PASSIVE_SKILLS)) {
+            game.setGamePhase(Game.GamePhase.SETUP);
+        }
+
         game = gameRepository.save(game);
         return convertToDTO(game);
     }
 
-    public GameDTO selectDeck(Long gameId, List<String> deckCards) {
+    public GameDTO selectDeck(Long gameId, String playerKey, List<String> deckCards) {
         if (gameId == null) {
             throw new IllegalArgumentException("Game ID cannot be null");
         }
         Game game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new RuntimeException("Game not found"));
 
-        // For now, assume player1 is selecting deck (can be extended for player2)
-        PlayerState playerState = game.getPlayer1State();
+        PlayerState playerState;
+        if ("player1".equals(playerKey)) {
+            playerState = game.getPlayer1State();
+        } else if ("player2".equals(playerKey)) {
+            playerState = game.getPlayer2State();
+        } else {
+            throw new RuntimeException("Invalid player key");
+        }
+
         if (playerState == null) {
             throw new RuntimeException("Player state not found");
         }
@@ -527,25 +546,46 @@ public class GameService {
             playerState.getDeck().add(card);
         }
 
+        // Check if both players have completed deck setup
+        if (hasPlayerCompletedSetup(game.getPlayer1State(), Game.GamePhase.SETUP) &&
+            hasPlayerCompletedSetup(game.getPlayer2State(), Game.GamePhase.SETUP)) {
+            game.setGamePhase(Game.GamePhase.HERO_POWER_OPTIONS);
+        }
+
         game = gameRepository.save(game);
         return convertToDTO(game);
     }
 
-    public GameDTO selectHeroPowers(Long gameId, List<String> heroPowers) {
+    public GameDTO selectHeroPowers(Long gameId, String playerKey, List<String> heroPowers) {
         if (gameId == null) {
             throw new IllegalArgumentException("Game ID cannot be null");
         }
         Game game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new RuntimeException("Game not found"));
 
-        // For now, assume player1 is selecting hero powers (can be extended for player2)
-        PlayerState playerState = game.getPlayer1State();
+        PlayerState playerState;
+        if ("player1".equals(playerKey)) {
+            playerState = game.getPlayer1State();
+        } else if ("player2".equals(playerKey)) {
+            playerState = game.getPlayer2State();
+        } else {
+            throw new RuntimeException("Invalid player key");
+        }
+
         if (playerState == null) {
             throw new RuntimeException("Player state not found");
         }
 
         // Set hero powers
         playerState.setHeroPowers(heroPowers);
+
+        // Check if both players have completed hero power setup
+        if (hasPlayerCompletedSetup(game.getPlayer1State(), Game.GamePhase.HERO_POWER_OPTIONS) &&
+            hasPlayerCompletedSetup(game.getPlayer2State(), Game.GamePhase.HERO_POWER_OPTIONS)) {
+            // Initialize the game with decks and start playing
+            initializeDecksForMultiplayer(game);
+            game.setGamePhase(Game.GamePhase.PLAYING);
+        }
 
         game = gameRepository.save(game);
         return convertToDTO(game);
@@ -715,5 +755,20 @@ public class GameService {
         dto.setTurnPlayed(card.getTurnPlayed());
         dto.setCurrentTurn(card.getCurrentTurn());
         return dto;
+    }
+
+    private boolean hasPlayerCompletedSetup(PlayerState playerState, Game.GamePhase phase) {
+        if (playerState == null) return false;
+
+        switch (phase) {
+            case PASSIVE_SKILLS:
+                return playerState.getPassiveSkills() != null && playerState.getPassiveSkills().size() >= 3;
+            case SETUP:
+                return playerState.getDeck() != null && playerState.getDeck().size() >= 15;
+            case HERO_POWER_OPTIONS:
+                return playerState.getHeroPowers() != null && playerState.getHeroPowers().size() >= 2;
+            default:
+                return false;
+        }
     }
 }

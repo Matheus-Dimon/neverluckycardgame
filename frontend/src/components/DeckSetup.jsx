@@ -1,6 +1,7 @@
 import React, { useContext } from 'react'
 import { CARD_OPTIONS } from '../utils/constants.js'
 import { GameContext } from '../context/GameContext'
+import { gameAPI } from '../utils/api.js'
 
 export default function DeckSetup() {
   const { state, dispatch } = useContext(GameContext)
@@ -21,12 +22,25 @@ export default function DeckSetup() {
     return newSelected
   }
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (selected.length < 15) {
       alert('Escolha exatamente 15 cartas para continuar!')
       return
     }
-    dispatch({ type: 'GO_TO_HERO_POWER_OPTIONS' })
+
+    if (state.isMultiplayer) {
+      try {
+        // Submit to backend for multiplayer
+        const updatedGame = await gameAPI.selectDeck(state.gameId, state.currentPlayerKey, selected)
+        // Update local state with the response
+        dispatch({ type: 'UPDATE_GAME_STATE', payload: updatedGame })
+      } catch (error) {
+        console.error('Failed to submit deck:', error)
+        alert('Erro ao enviar deck. Tente novamente.')
+      }
+    } else {
+      dispatch({ type: 'GO_TO_HERO_POWER_OPTIONS' })
+    }
   }
 
   const getEffectBadges = (effects) => {

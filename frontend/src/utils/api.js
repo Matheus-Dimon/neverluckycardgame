@@ -82,6 +82,21 @@ export const gameAPI = {
   getGame: (gameId) => apiRequest(`/game/${gameId}`),
 
   startGame: (gameId) => apiRequest(`/game/${gameId}/start`, { method: 'POST' }),
+
+  selectPassiveSkills: (gameId, playerKey, passiveSkills) => apiRequest(`/game/${gameId}/select-passive-skills?playerKey=${playerKey}`, {
+    method: 'POST',
+    body: JSON.stringify(passiveSkills)
+  }),
+
+  selectDeck: (gameId, playerKey, deckCards) => apiRequest(`/game/${gameId}/select-deck?playerKey=${playerKey}`, {
+    method: 'POST',
+    body: JSON.stringify(deckCards)
+  }),
+
+  selectHeroPowers: (gameId, playerKey, heroPowers) => apiRequest(`/game/${gameId}/select-hero-powers?playerKey=${playerKey}`, {
+    method: 'POST',
+    body: JSON.stringify(heroPowers)
+  }),
 };
 
 export default apiRequest;
