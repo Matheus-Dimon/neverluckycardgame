@@ -58,6 +58,7 @@ public class GameService {
 
         Game game = new Game();
         game.setPlayer1(player1);
+        game.setInvitedUser(friend);
         game.setStatus(Game.GameStatus.PENDING);
         game.setGamePhase(Game.GamePhase.START_MENU);
         game.setTurn(Game.Turn.PLAYER1);
@@ -88,7 +89,12 @@ public class GameService {
         }
 
         game.setPlayer2(player2);
-        game.setStatus(Game.GameStatus.ACCEPTED);
+        game.setStatus(Game.GameStatus.ACTIVE);
+        game.setGamePhase(Game.GamePhase.PLAYING);
+
+        // Initialize decks with default cards for multiplayer
+        initializeDecksForMultiplayer(game);
+
         game = gameRepository.save(game);
         return convertToDTO(game);
     }
@@ -110,7 +116,7 @@ public class GameService {
     }
 
     public List<GameDTO> getPendingInvites(Long userId) {
-        List<Game> games = gameRepository.findByStatusAndPlayer1Id(Game.GameStatus.PENDING, userId);
+        List<Game> games = gameRepository.findByInvitedUserIdAndStatus(userId, Game.GameStatus.PENDING);
         return games.stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
@@ -119,6 +125,13 @@ public class GameService {
         // For simplicity, assuming we need to query by status pending and perhaps store invited user separately
         // But for now, we'll assume invites are stored in a way we can query
         return new ArrayList<>(); // Placeholder
+    }
+
+    public List<GameDTO> getActiveGamesForUser(Long userId) {
+        List<Game> gamesAsPlayer1 = gameRepository.findByPlayer1IdAndStatus(userId, Game.GameStatus.ACTIVE);
+        List<Game> gamesAsPlayer2 = gameRepository.findByPlayer2IdAndStatus(userId, Game.GameStatus.ACTIVE);
+        gamesAsPlayer1.addAll(gamesAsPlayer2);
+        return gamesAsPlayer1.stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
     public GameDTO getGame(Long gameId) {
@@ -534,6 +547,72 @@ public class GameService {
         return convertToDTO(game);
     }
 
+    private void initializeDecksForMultiplayer(Game game) {
+        // Initialize player1 deck
+        PlayerState p1State = game.getPlayer1State();
+        if (p1State.getDeck().isEmpty()) {
+            // Add some default cards for player1
+            for (int i = 0; i < 15; i++) {
+                Card card = new Card();
+                card.setCardId("p1_" + (i + 1));
+                card.setUniqueId("p1_" + (i + 1) + "_" + System.currentTimeMillis() + "_" + Math.random());
+                card.setName("Player1 Card " + (i + 1));
+                card.setMana(Math.min(5, i % 5 + 1));
+                card.setAttack(Math.min(5, i % 5 + 1));
+                card.setDefense(Math.min(5, i % 5 + 1));
+                card.setUnitType(Card.UnitType.WARRIOR);
+                card.setCanAttack(false);
+                card.setImmuneFirstTurn(false);
+                card.setTurnPlayed(0);
+                card.setCurrentTurn(0);
+                p1State.getDeck().add(card);
+            }
+        }
+
+        // Initialize player2 deck
+        PlayerState p2State = game.getPlayer2State();
+        if (p2State.getDeck().isEmpty()) {
+            // Add some default cards for player2
+            for (int i = 0; i < 15; i++) {
+                Card card = new Card();
+                card.setCardId("p2_" + (i + 1));
+                card.setUniqueId("p2_" + (i + 1) + "_" + System.currentTimeMillis() + "_" + Math.random());
+                card.setName("Player2 Card " + (i + 1));
+                card.setMana(Math.min(5, i % 5 + 1));
+                card.setAttack(Math.min(5, i % 5 + 1));
+                card.setDefense(Math.min(5, i % 5 + 1));
+                card.setUnitType(Card.UnitType.WARRIOR);
+                card.setCanAttack(false);
+                card.setImmuneFirstTurn(false);
+                card.setTurnPlayed(0);
+                card.setCurrentTurn(0);
+                p2State.getDeck().add(card);
+            }
+        }
+
+        // Set default hero powers
+        if (p1State.getHeroPowers().isEmpty()) {
+            p1State.getHeroPowers().add("p1_fireblast");
+            p1State.getHeroPowers().add("p1_armor");
+        }
+        if (p2State.getHeroPowers().isEmpty()) {
+            p2State.getHeroPowers().add("p2_fireblast");
+            p2State.getHeroPowers().add("p2_armor");
+        }
+
+        // Draw initial hands
+        drawInitialHand(p1State);
+        drawInitialHand(p2State);
+    }
+
+    private void drawInitialHand(PlayerState playerState) {
+        // Draw 4 cards for multiplayer
+        for (int i = 0; i < 4 && !playerState.getDeck().isEmpty(); i++) {
+            Card card = playerState.getDeck().remove(0);
+            playerState.getHand().add(card);
+        }
+    }
+
     private PlayerState createInitialPlayerState() {
         PlayerState state = new PlayerState();
         state.setHp(30);
@@ -561,6 +640,19 @@ public class GameService {
         dto.setTurnCount(game.getTurnCount());
         dto.setGameOver(game.getGameOver());
         dto.setWinner(game.getWinner());
+
+        if (game.getPlayer1() != null) {
+            dto.setPlayer1Id(game.getPlayer1().getId());
+            dto.setPlayer1Username(game.getPlayer1().getUsername());
+        }
+        if (game.getPlayer2() != null) {
+            dto.setPlayer2Id(game.getPlayer2().getId());
+            dto.setPlayer2Username(game.getPlayer2().getUsername());
+        }
+        if (game.getInvitedUser() != null) {
+            dto.setInvitedUserId(game.getInvitedUser().getId());
+            dto.setInvitedUsername(game.getInvitedUser().getUsername());
+        }
 
         if (game.getPlayer1State() != null) {
             dto.setPlayer1State(convertPlayerStateToDTO(game.getPlayer1State()));

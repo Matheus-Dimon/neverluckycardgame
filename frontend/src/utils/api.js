@@ -77,6 +77,8 @@ export const gameAPI = {
 
   getPendingInvites: (userId) => apiRequest(`/game/pending-invites/${userId}`),
 
+  getActiveGames: (userId) => apiRequest(`/game/active-games/${userId}`),
+
   getGame: (gameId) => apiRequest(`/game/${gameId}`),
 
   startGame: (gameId) => apiRequest(`/game/${gameId}/start`, { method: 'POST' }),

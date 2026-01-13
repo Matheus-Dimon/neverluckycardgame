@@ -12,6 +12,13 @@ public class GameDTO {
     private Boolean gameOver;
     private String winner;
 
+    private Long player1Id;
+    private Long player2Id;
+    private String player1Username;
+    private String player2Username;
+    private Long invitedUserId;
+    private String invitedUsername;
+
     private PlayerStateDTO player1State;
     private PlayerStateDTO player2State;
 

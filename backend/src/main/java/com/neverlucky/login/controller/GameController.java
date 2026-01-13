@@ -44,6 +44,12 @@ public class GameController {
         return ResponseEntity.ok(invites);
     }
 
+    @GetMapping("/active-games/{userId}")
+    public ResponseEntity<java.util.List<GameDTO>> getActiveGamesForUser(@PathVariable Long userId) {
+        java.util.List<GameDTO> games = gameService.getActiveGamesForUser(userId);
+        return ResponseEntity.ok(games);
+    }
+
     @GetMapping("/{gameId}")
     public ResponseEntity<GameDTO> getGame(@PathVariable Long gameId) {
         GameDTO game = gameService.getGame(gameId);

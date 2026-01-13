@@ -617,6 +617,77 @@ function reducer(state=initialState, action){
       }
     }
 
+    case 'LOAD_MULTIPLAYER_GAME': {
+      const { gameData, playerKey } = action.payload
+
+      // Convert backend game data to frontend format
+      const convertPlayerState = (backendState, isPlayer1) => {
+        const cardOptions = isPlayer1 ? CARD_OPTIONS.P1 : CARD_OPTIONS.P2
+        const heroOptions = isPlayer1 ? HERO_POWER_OPTIONS.P1 : HERO_POWER_OPTIONS.P2
+
+        return {
+          hp: backendState.hp,
+          mana: backendState.mana,
+          maxMana: backendState.maxMana,
+          armor: backendState.armor,
+          hand: backendState.hand.map(card => ({
+            ...card,
+            id: card.uniqueId,
+            type: { lane: card.lane, name: card.unitType === 'WARRIOR' ? 'Guerreiro' : 'Clérigo' }
+          })),
+          deck: backendState.deck.map(card => ({
+            ...card,
+            id: card.uniqueId,
+            type: { lane: card.lane, name: card.unitType === 'WARRIOR' ? 'Guerreiro' : 'Clérigo' }
+          })),
+          field: {
+            melee: backendState.meleeField.map(card => ({
+              ...card,
+              id: card.uniqueId,
+              type: { lane: card.lane, name: card.unitType === 'WARRIOR' ? 'Guerreiro' : 'Clérigo' }
+            })),
+            ranged: backendState.rangedField.map(card => ({
+              ...card,
+              id: card.uniqueId,
+              type: { lane: card.lane, name: card.unitType === 'WARRIOR' ? 'Guerreiro' : 'Clérigo' }
+            }))
+          },
+          heroPowers: backendState.heroPowers.map(powerId => {
+            const power = heroOptions.find(p => p.id === powerId)
+            return power ? {...power} : { id: powerId, name: 'Unknown', effect: 'damage', cost: 2, amount: 1 }
+          }),
+          hasUsedHeroPower: backendState.hasUsedHeroPower,
+          passiveSkills: backendState.passiveSkills || []
+        }
+      }
+
+      let player1, player2, turn
+
+      if (playerKey === 'player1') {
+        player1 = convertPlayerState(gameData.player1State, true)
+        player2 = convertPlayerState(gameData.player2State, false)
+        turn = gameData.turn.toLowerCase()
+      } else {
+        // If current user is player2, swap the players so player1 is always the current user
+        player1 = convertPlayerState(gameData.player2State, false)
+        player2 = convertPlayerState(gameData.player1State, true)
+        turn = gameData.turn.toLowerCase() === 'player1' ? 'player2' : 'player1'
+      }
+
+      return {
+        ...state,
+        player1,
+        player2,
+        gamePhase: 'PLAYING',
+        turn,
+        turnCount: gameData.turnCount,
+        gameOver: gameData.gameOver,
+        winner: gameData.winner,
+        isMultiplayer: true,
+        currentPlayerKey: playerKey
+      }
+    }
+
     case 'PLAY_CARD': {
       const {cardId, playerKey} = action.payload
       const player = {...state[playerKey]}

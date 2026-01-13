@@ -19,9 +19,10 @@ const FriendsPage = ({ onBack }) => {
 
   useEffect(() => {
     loadFriendsData();
-    // Refresh friends list every 10 seconds to update online status
+    // Refresh friends list every 10 seconds to update online status and check for active games
     const interval = setInterval(() => {
       loadFriendsData();
+      checkForActiveGames();
     }, 10000);
     return () => clearInterval(interval);
   }, []);
@@ -37,7 +38,9 @@ const FriendsPage = ({ onBack }) => {
         friendAPI.getSentRequests(),
         userId ? gameAPI.getPendingInvites(userId) : Promise.resolve([])
       ]);
-      setFriends(friendsData);
+      // Filter out current user from friends list as extra safeguard
+      const filteredFriends = friendsData.filter(friend => friend.id !== userId);
+      setFriends(filteredFriends);
       setPendingRequests(pendingData);
       setSentRequests(sentData);
       setGameInvites(invitesData);
@@ -55,8 +58,12 @@ const FriendsPage = ({ onBack }) => {
       return;
     }
     try {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      const currentUserId = currentUser.id;
       const results = await friendAPI.searchUsers(query);
-      setSearchResults(results);
+      // Additional frontend filter to ensure current user is not shown
+      const filteredResults = results.filter(user => user.id !== currentUserId);
+      setSearchResults(filteredResults);
     } catch (err) {
       console.error('Search failed:', err);
     }
@@ -129,10 +136,18 @@ const FriendsPage = ({ onBack }) => {
         return;
       }
       await gameAPI.acceptInvite(gameId, userId);
-      setSuccess('Game invitation accepted! Setting up game...');
+      setSuccess('Game invitation accepted! Loading game...');
       loadFriendsData(); // Refresh data
-      // Start multiplayer setup
-      dispatch({ type: 'START_MULTIPLAYER_SETUP' });
+      // Load the active game
+      const activeGames = await gameAPI.getActiveGames(userId);
+      if (activeGames.length > 0) {
+        const game = activeGames[0];
+        let playerKey = 'player1';
+        if (game.player2Id && game.player2Id.toString() === userId.toString()) {
+          playerKey = 'player2';
+        }
+        dispatch({ type: 'LOAD_MULTIPLAYER_GAME', payload: { gameData: game, playerKey } });
+      }
     } catch (err) {
       setError('Failed to accept game invitation: ' + err.message);
     }
@@ -151,6 +166,29 @@ const FriendsPage = ({ onBack }) => {
       loadFriendsData(); // Refresh data
     } catch (err) {
       setError('Failed to decline game invitation: ' + err.message);
+    }
+  };
+
+  const checkForActiveGames = async () => {
+    try {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      const userId = currentUser.id;
+      if (!userId) return;
+
+      const activeGames = await gameAPI.getActiveGames(userId);
+      if (activeGames.length > 0) {
+        // Load the first active game
+        const game = activeGames[0];
+        let playerKey = 'player1';
+        if (game.player2Id && game.player2Id.toString() === userId.toString()) {
+          playerKey = 'player2';
+        }
+        dispatch({ type: 'LOAD_MULTIPLAYER_GAME', payload: { gameData: game, playerKey } });
+        // You might need to navigate to the game screen here
+        // For now, assume the app handles the gamePhase change
+      }
+    } catch (err) {
+      console.error('Failed to check for active games:', err);
     }
   };
 
