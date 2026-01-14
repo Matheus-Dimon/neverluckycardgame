@@ -40,7 +40,15 @@ export default function PassiveSkillsSetup() {
   }
 
   // Check if we're waiting for the other player in multiplayer
-  const isWaitingForOtherPlayer = state.isMultiplayer && selected.length === 3
+  const hasOpponentCompletedPassiveSkills = state.isMultiplayer && state.gameId && (() => {
+    if (state.currentPlayerKey === 'player1') {
+      return state.player2PassiveSkillsComplete === true
+    } else {
+      return state.player1PassiveSkillsComplete === true
+    }
+  })()
+
+  const isWaitingForOtherPlayer = state.isMultiplayer && selected.length === 3 && !hasOpponentCompletedPassiveSkills
 
   return (
     <div className="passive-skills-setup">
@@ -52,6 +60,14 @@ export default function PassiveSkillsSetup() {
             : `Escolha exatamente 3 habilidades • ${selected.length}/3 selecionadas`
           }
         </p>
+        {state.isMultiplayer && state.gameId && (
+          <p className="opponent-status">
+            {hasOpponentCompletedPassiveSkills
+              ? "✅ Oponente já escolheu habilidades passivas - Pronto para continuar!"
+              : "⏳ Aguardando oponente escolher habilidades passivas..."
+            }
+          </p>
+        )}
         <p className="setup-note">
           Essas habilidades estarão ativas durante toda a partida
         </p>

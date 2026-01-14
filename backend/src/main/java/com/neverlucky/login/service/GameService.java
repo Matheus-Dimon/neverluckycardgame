@@ -705,6 +705,18 @@ public class GameService {
             dto.setPlayer2State(convertPlayerStateToDTO(game.getPlayer2State()));
         }
 
+        // Set completion status for setup phases
+        if (game.getPlayer1State() != null) {
+            dto.setPlayer1PassiveSkillsComplete(hasPlayerCompletedSetup(game.getPlayer1State(), Game.GamePhase.PASSIVE_SKILLS));
+            dto.setPlayer1DeckComplete(hasPlayerCompletedSetup(game.getPlayer1State(), Game.GamePhase.SETUP));
+            dto.setPlayer1HeroPowersComplete(hasPlayerCompletedSetup(game.getPlayer1State(), Game.GamePhase.HERO_POWER_OPTIONS));
+        }
+        if (game.getPlayer2State() != null) {
+            dto.setPlayer2PassiveSkillsComplete(hasPlayerCompletedSetup(game.getPlayer2State(), Game.GamePhase.PASSIVE_SKILLS));
+            dto.setPlayer2DeckComplete(hasPlayerCompletedSetup(game.getPlayer2State(), Game.GamePhase.SETUP));
+            dto.setPlayer2HeroPowersComplete(hasPlayerCompletedSetup(game.getPlayer2State(), Game.GamePhase.HERO_POWER_OPTIONS));
+        }
+
         return dto;
     }
 

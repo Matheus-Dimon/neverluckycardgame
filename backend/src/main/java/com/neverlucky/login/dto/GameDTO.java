@@ -35,4 +35,12 @@ public class GameDTO {
     private AnimationDTO animation;
     private Boolean isAITurnProcessing;
     private Boolean soundEnabled;
+
+    // Player completion status for setup phases
+    private Boolean player1PassiveSkillsComplete;
+    private Boolean player2PassiveSkillsComplete;
+    private Boolean player1DeckComplete;
+    private Boolean player2DeckComplete;
+    private Boolean player1HeroPowersComplete;
+    private Boolean player2HeroPowersComplete;
 }

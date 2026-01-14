@@ -44,7 +44,15 @@ export default function DeckSetup() {
   }
 
   // Check if we're waiting for the other player in multiplayer
-  const isWaitingForOtherPlayer = state.isMultiplayer && selected.length === 15
+  const hasOpponentCompletedDeck = state.isMultiplayer && state.gameId && (() => {
+    if (state.currentPlayerKey === 'player1') {
+      return state.player2DeckComplete === true
+    } else {
+      return state.player1DeckComplete === true
+    }
+  })()
+
+  const isWaitingForOtherPlayer = state.isMultiplayer && selected.length === 15 && !hasOpponentCompletedDeck
 
   const getEffectBadges = (effects) => {
     if (!effects || effects.length === 0) return null
@@ -79,6 +87,14 @@ export default function DeckSetup() {
           }
           {selected.length === 15 && !isWaitingForOtherPlayer && <span className="warning"> - Deck completo!</span>}
         </p>
+        {state.isMultiplayer && state.gameId && (
+          <p className="opponent-status">
+            {hasOpponentCompletedDeck
+              ? "✅ Oponente já escolheu o deck - Pronto para continuar!"
+              : "⏳ Aguardando oponente escolher deck..."
+            }
+          </p>
+        )}
       </div>
 
       {selected.length === 15 && (

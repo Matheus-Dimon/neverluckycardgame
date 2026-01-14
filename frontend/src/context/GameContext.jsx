@@ -1,6 +1,7 @@
 import React, { createContext, useReducer, useEffect, useRef } from 'react'
 import { makeStartingDeck, makeStartingHeropower, shuffle, applyPassiveEffects, makeOrderedDeck } from '../utils/helpers.js'
 import { CARD_OPTIONS, HERO_POWER_OPTIONS, HERO_PASSIVE_OPTIONS, STARTING_HP, STARTING_MANA, CARD_EFFECTS,STARTING_MANAP2 } from '../utils/constants.js'
+import { gameAPI } from '../utils/api.js'
 
 export const GameContext = createContext(null)
 const STARTING_DECK_SIZE = 15
@@ -380,12 +381,6 @@ function applyHeroPowerEffect(state, playerKey, power, targetCardId = null, targ
       }
     }
 
-    case 'mana_boost': {
-      const amount = power.amount || 2
-      player.mana += amount
-      return {...state, [playerKey]: player}
-    }
-
     case 'draw_from_graveyard': {
       // Assuming graveyard is not implemented, just draw normal
       const count = power.amount || 1
@@ -525,13 +520,23 @@ function reducer(state=initialState, action){
 
       return {
         ...state,
+        gameId: gameData.id,
         player1,
         player2,
         gamePhase,
         turn,
         turnCount: gameData.turnCount || 1,
         gameOver: gameData.gameOver || false,
-        winner: gameData.winner
+        winner: gameData.winner,
+        isMultiplayer: true,
+        currentPlayerKey: state.currentPlayerKey,
+        // Add completion status fields
+        player1PassiveSkillsComplete: gameData.player1PassiveSkillsComplete,
+        player2PassiveSkillsComplete: gameData.player2PassiveSkillsComplete,
+        player1DeckComplete: gameData.player1DeckComplete,
+        player2DeckComplete: gameData.player2DeckComplete,
+        player1HeroPowersComplete: gameData.player1HeroPowersComplete,
+        player2HeroPowersComplete: gameData.player2HeroPowersComplete
       }
     }
 

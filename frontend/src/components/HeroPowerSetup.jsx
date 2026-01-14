@@ -40,7 +40,15 @@ export default function HeroPowerSetup() {
   }
 
   // Check if we're waiting for the other player in multiplayer
-  const isWaitingForOtherPlayer = state.isMultiplayer && state.gameId && selected.length === 2
+  const hasOpponentCompletedHeroPowers = state.isMultiplayer && state.gameId && (() => {
+    if (state.currentPlayerKey === 'player1') {
+      return state.player2HeroPowersComplete === true
+    } else {
+      return state.player1HeroPowersComplete === true
+    }
+  })()
+
+  const isWaitingForOtherPlayer = state.isMultiplayer && state.gameId && selected.length === 2 && !hasOpponentCompletedHeroPowers
 
   const getEffectDescription = (power) => {
     switch(power.effect) {
@@ -62,6 +70,14 @@ export default function HeroPowerSetup() {
             : `Escolha exatamente 2 poderes • ${selected.length} selecionados`
           }
         </p>
+        {state.isMultiplayer && state.gameId && (
+          <p className="opponent-status">
+            {hasOpponentCompletedHeroPowers
+              ? "✅ Oponente já escolheu poderes de herói - Pronto para começar!"
+              : "⏳ Aguardando oponente escolher poderes de herói..."
+            }
+          </p>
+        )}
       </div>
 
       <div className="hero-power-grid">

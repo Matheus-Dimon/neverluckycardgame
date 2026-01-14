@@ -732,6 +732,14 @@ body{
   font-weight: 600;
 }
 
+.opponent-status{
+  color: #fbbf24;
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 8px;
+  text-shadow: 0 0 10px rgba(251,191,36,0.5);
+}
+
 .deck-grid{
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
