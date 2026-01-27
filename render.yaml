@@ -7,9 +7,9 @@ services:
     dockerfilePath: backend/Dockerfile
     autoDeploy: true
 
-  - type: static
+  - type: static_site
     name: neverlucky-frontend
     branch: master
     buildCommand: cd frontend && npm ci && npm run build
-    staticPublishPath: frontend/dist
+    publishPath: frontend/dist
     autoDeploy: true
