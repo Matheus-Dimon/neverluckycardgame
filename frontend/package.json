@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "prebuild": "chmod +x ./node_modules/.bin/vite || true",
+    "build": "node --input-type=module -e \"import('vite').then(m=>m.build())\"",
     "preview": "vite preview"
   },
   "dependencies": {
