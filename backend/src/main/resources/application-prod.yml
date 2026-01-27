@@ -4,9 +4,17 @@ server:
 spring:
   datasource:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/neverlucky}
-    username: ${DB_USER:}
+    username: ${DB_USER:postgres}
     password: ${DB_PASSWORD:}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connectionTimeout: 20000
+      maximumPoolSize: 5
   jpa:
     hibernate:
       ddl-auto: update
@@ -14,10 +22,12 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    open-in-view: false
 
 # Frontend URLs for CORS configuration
 frontend:
   url: ${FRONTEND_URL:https://your-frontend.vercel.app}
-  urls: ${FRONTEND_URLS:}
+  urls: ${FRONTEND_URLS:http://localhost:3000,http://localhost:5173}
 
 # Activate this profile via --spring.profiles.active=prod or SPRING_PROFILES_ACTIVE=prod

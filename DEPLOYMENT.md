@@ -15,13 +15,26 @@ This guide explains how to deploy the NeverLucky application with the backend on
 Set these environment variables in your Render dashboard:
 
 ```
-PORT: 8080 (Render will override this automatically)
 SPRING_PROFILES_ACTIVE: prod
 DATABASE_URL: your-postgres-connection-string
 DB_USER: your-db-username
 DB_PASSWORD: your-db-password
 FRONTEND_URL: https://your-frontend.vercel.app
 FRONTEND_URLS: http://localhost:3000,http://localhost:5173
+```
+
+**Important:** Do not set PORT manually - Render will override this automatically.
+
+**Database Connection String Format:**
+```
+jdbc:postgresql://hostname:port/database_name
+```
+
+**Example for Render PostgreSQL:**
+```
+DATABASE_URL: jdbc:postgresql://your-db.internal:5432/neverlucky
+DB_USER: postgres
+DB_PASSWORD: your-secure-password
 ```
 
 ### 2. Build Configuration
@@ -89,3 +102,41 @@ The backend is configured to accept requests from:
 ### Common Issues
 - **CORS errors**: Check that your frontend URL is in the allowed origins
 - **Connection refused**: Verify backend URL and that the service is running
+
+### Database-Specific Issues
+
+#### 1. Database Connection Failed
+**Error**: `Connection refused` or `Unable to acquire JDBC Connection`
+**Solution**: 
+- Verify DATABASE_URL is correctly formatted
+- Ensure database is accessible from Render
+- Check DB_USER and DB_PASSWORD are correct
+- Test connection string independently
+
+#### 2. Authentication Failed
+**Error**: `Access denied for user` or `password authentication failed`
+**Solution**:
+- Verify DB_USER and DB_PASSWORD environment variables
+- Ensure database user has proper permissions
+- Check if database requires SSL connection
+
+#### 3. Database Not Found
+**Error**: `Database "neverlucky" does not exist`
+**Solution**:
+- Create the database manually in PostgreSQL
+- Ensure database name matches DATABASE_URL
+- Verify database user has CREATE permissions
+
+#### 4. Connection Pool Exhausted
+**Error**: `HikariPool-1 - Connection is not available`
+**Solution**:
+- Increase connection pool size in application-prod.yml
+- Check for connection leaks in application code
+- Monitor database connection usage
+
+#### 5. Schema Update Issues
+**Error**: `Table already exists` or `Column not found`
+**Solution**:
+- Set `spring.jpa.hibernate.ddl-auto: update` (current setting)
+- Manually run database migrations if needed
+- Check entity mappings match database schema
