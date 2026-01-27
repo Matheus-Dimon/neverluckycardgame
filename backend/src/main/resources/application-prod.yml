@@ -15,4 +15,9 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
+# Frontend URLs for CORS configuration
+frontend:
+  url: ${FRONTEND_URL:https://your-frontend.vercel.app}
+  urls: ${FRONTEND_URLS:}
+
 # Activate this profile via --spring.profiles.active=prod or SPRING_PROFILES_ACTIVE=prod
