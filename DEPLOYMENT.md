@@ -89,4 +89,3 @@ The backend is configured to accept requests from:
 ### Common Issues
 - **CORS errors**: Check that your frontend URL is in the allowed origins
 - **Connection refused**: Verify backend URL and that the service is running
-- **Database errors**: Check database credentials and connection string
