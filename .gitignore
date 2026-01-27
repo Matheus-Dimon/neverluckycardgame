@@ -1,5 +1,6 @@
 HELP.md
 target/
+backend/target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
@@ -34,3 +35,7 @@ build/
 
 # Ignore node_modules folders
 **/node_modules/
+
+# Env files
+.env
+.env.*
