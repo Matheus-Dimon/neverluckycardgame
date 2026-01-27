@@ -3,7 +3,6 @@ services:
     name: neverlucky-backend
     env: docker
     branch: master
-    plan: free
     dockerfilePath: backend/Dockerfile
     autoDeploy: true
 
@@ -11,7 +10,6 @@ services:
     name: neverlucky-frontend
     env: static
     branch: master
-    plan: free
     buildCommand: cd frontend && npm ci && npm run build
     staticPublishPath: frontend/dist
     autoDeploy: true
