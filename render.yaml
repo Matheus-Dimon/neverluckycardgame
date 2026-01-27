@@ -7,10 +7,11 @@ services:
     dockerfilePath: backend/Dockerfile
     autoDeploy: true
 
-  - type: web
+  - type: static
     name: neverlucky-frontend
-    env: docker
+    env: static
     branch: master
     plan: free
-    dockerfilePath: frontend/Dockerfile
+    buildCommand: cd frontend && npm ci && npm run build
+    publishPath: frontend/dist
     autoDeploy: true
