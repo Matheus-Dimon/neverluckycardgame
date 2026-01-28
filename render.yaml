@@ -7,3 +7,8 @@ services:
     rootDir: backend
     dockerfilePath: Dockerfile
     autoDeploy: true
+    envVars:
+      - key: JWT_SECRET
+        fromDatabase:
+          name: JWT_SECRET
+          encryption: sse
