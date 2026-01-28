@@ -24,4 +24,4 @@ COPY --from=builder /app/target/*.jar app.jar
 
 EXPOSE ${PORT:-8080}
 ENV JAVA_OPTS="-Xms512m -Xmx1024m"
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /app/app.jar --spring.profiles.active=prod"]
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /app/app.jar --spring.profiles.active=${SPRING_PROFILES_ACTIVE:-prod}"]
