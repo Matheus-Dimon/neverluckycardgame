@@ -4,6 +4,6 @@ services:
     env: docker
     branch: master
     plan: free
-    dockerfilePath: backend/Dockerfile
+    rootDir: backend
+    dockerfilePath: Dockerfile
     autoDeploy: true
-
