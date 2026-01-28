@@ -12,7 +12,7 @@ COPY pom.xml .
 COPY src src
 
 # Build the application
-RUN ./mvnw clean package -DskipTests
+RUN chmod +x mvnw && ./mvnw clean package -DskipTests
 
 # Runtime stage
 FROM eclipse-temurin:17-jre-focal
