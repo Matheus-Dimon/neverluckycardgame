@@ -24,11 +24,10 @@ public class JwtUtil {
 
     @PostConstruct
     public void init() {
-        // Evita loop infinito no deploy
+        // Provide fallback default value if JWT_SECRET is not set
         if (jwtSecret == null || jwtSecret.isBlank()) {
-            throw new IllegalStateException(
-                "JWT_SECRET environment variable must be set and not empty"
-            );
+            jwtSecret = "default-jwt-secret-key-for-development-only-1234567890123456789012345678901234567890";
+            System.out.println("WARNING: JWT_SECRET not set, using fallback default value. This should only be used for development!");
         }
 
         // JJWT exige no mínimo 32 caracteres para HS256

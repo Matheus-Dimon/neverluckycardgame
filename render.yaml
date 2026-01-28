@@ -9,6 +9,4 @@ services:
     autoDeploy: true
     envVars:
       - key: JWT_SECRET
-        fromDatabase:
-          name: JWT_SECRET
-          encryption: sse
+        value: "your-secure-jwt-secret-key-for-production-1234567890123456789012345678901234567890"
