@@ -7,6 +7,7 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 import java.util.function.Function;
@@ -18,15 +19,33 @@ public class JwtUtil {
     private String jwtSecret;
 
     private Key secretKey;
-    private static final int JWT_EXPIRATION = 86400000; // 24 hours
+
+    private static final long JWT_EXPIRATION = 1000 * 60 * 60 * 24; // 24h
 
     @PostConstruct
     public void init() {
+        // Evita loop infinito no deploy
         if (jwtSecret == null || jwtSecret.isBlank()) {
-            throw new IllegalStateException("JWT_SECRET environment variable must be set");
+            throw new IllegalStateException(
+                "JWT_SECRET environment variable must be set and not empty"
+            );
         }
-        secretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes());
+
+        // JJWT exige no mínimo 32 caracteres para HS256
+        if (jwtSecret.length() < 32) {
+            throw new IllegalStateException(
+                "JWT_SECRET must be at least 32 characters long"
+            );
+        }
+
+        this.secretKey = Keys.hmacShaKeyFor(
+                jwtSecret.getBytes(StandardCharsets.UTF_8)
+        );
     }
+
+    /* ========================
+       TOKEN GENERATION
+       ======================== */
 
     public String generateToken(String username) {
         return Jwts.builder()
@@ -36,6 +55,10 @@ public class JwtUtil {
                 .signWith(secretKey)
                 .compact();
     }
+
+    /* ========================
+       TOKEN EXTRACTION
+       ======================== */
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -51,15 +74,46 @@ public class JwtUtil {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
+        token = cleanToken(token);
+
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 
-    public Boolean isTokenExpired(String token) {
+    /* ========================
+       TOKEN VALIDATION
+       ======================== */
+
+    public boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
-    public Boolean validateToken(String token, String username) {
-        final String extractedUsername = extractUsername(token);
-        return (username.equals(extractedUsername) && !isTokenExpired(token));
+    public boolean validateToken(String token, String username) {
+        try {
+            final String extractedUsername = extractUsername(token);
+            return extractedUsername.equals(username) && !isTokenExpired(token);
+        } catch (Exception e) {
+            // Qualquer erro invalida o token (sem crashar o app)
+            return false;
+        }
+    }
+
+    /* ========================
+       HELPERS
+       ======================== */
+
+    private String cleanToken(String token) {
+        if (token == null) {
+            throw new IllegalArgumentException("Token cannot be null");
+        }
+
+        if (token.startsWith("Bearer ")) {
+            return token.substring(7);
+        }
+
+        return token;
     }
 }
