@@ -9,6 +9,12 @@ public class GameDTO {
     private String gamePhase;
     private String turn;
     private Integer turnCount;
+    
+    // Helper method to get current player key based on turn
+    public String getCurrentPlayerKey() {
+        if (turn == null) return null;
+        return turn.name().toLowerCase();
+    }
     private Boolean gameOver;
     private String winner;
 

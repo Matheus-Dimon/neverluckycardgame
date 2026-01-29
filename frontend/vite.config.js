@@ -3,22 +3,22 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
+
   server: {
     open: true
   },
+
   build: {
     outDir: 'dist',
-    assetsDir: 'assets'
+    assetsDir: 'assets',
+    rollupOptions: {
+      input: './index.html'
+    }
   },
+
   resolve: {
     alias: {
       '@': '/src'
-    }
-  },
-  root: '.',
-  build: {
-    rollupOptions: {
-      input: './index.html'
     }
   }
 });

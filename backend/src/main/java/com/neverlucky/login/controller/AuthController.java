@@ -4,6 +4,7 @@ import com.neverlucky.login.config.JwtUtil;
 import com.neverlucky.login.model.User;
 import com.neverlucky.login.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,86 +15,79 @@ import java.util.Map;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    @GetMapping("/test")
-    public ResponseEntity<String> test() {
-        return ResponseEntity.ok("Test endpoint works");
-    }
-
-    @GetMapping("/")
-    public ResponseEntity<Map<String, Object>> healthCheck() {
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "UP");
-        response.put("service", "NeverLucky Card Game Backend");
-        response.put("timestamp", System.currentTimeMillis());
-        return ResponseEntity.ok(response);
-    }
-
     @Autowired
     private UserService userService;
 
     @Autowired
     private JwtUtil jwtUtil;
 
-@PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody User user) {
-        try {
-            if (user.getUsername() == null || user.getUsername().trim().isEmpty()) {
-                return ResponseEntity.badRequest().body("Username is required");
-            }
-            if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
-                return ResponseEntity.badRequest().body("Password is required");
-            }
-            if (userService.findByUsername(user.getUsername()) != null) {
-                return ResponseEntity.badRequest().body("Username already exists");
-            }
-            userService.register(user);
-            return ResponseEntity.ok("User registered successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Registration failed: " + e.getMessage());
+    // =========================
+    // REGISTER
+    // =========================
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody User user) {
+        if (user.getUsername() == null || user.getUsername().isBlank()) {
+            return ResponseEntity.badRequest().body("Username is required");
         }
+
+        if (user.getPassword() == null || user.getPassword().isBlank()) {
+            return ResponseEntity.badRequest().body("Password is required");
+        }
+
+        if (userService.findByUsername(user.getUsername()) != null) {
+            return ResponseEntity.badRequest().body("Username already exists");
+        }
+
+        userService.register(user);
+        return ResponseEntity.ok("User registered successfully");
     }
 
-@PostMapping("/login")
+    // =========================
+    // LOGIN
+    // =========================
+    @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User user) {
-        try {
-            if (user.getUsername() == null || user.getUsername().trim().isEmpty()) {
-                return ResponseEntity.badRequest().body("Username is required");
-            }
-            if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
-                return ResponseEntity.badRequest().body("Password is required");
-            }
-            System.out.println("Login attempt for user: " + user.getUsername());
-            if (userService.authenticate(user.getUsername(), user.getPassword())) {
-                System.out.println("Authentication successful for: " + user.getUsername());
-                User loggedInUser = userService.findByUsername(user.getUsername());
-                userService.setOnlineStatus(user.getUsername(), true);
-                String token = jwtUtil.generateToken(user.getUsername());
-                Map<String, Object> response = new HashMap<>();
-                response.put("token", token);
-                response.put("username", user.getUsername());
-                response.put("id", loggedInUser.getId());
-                return ResponseEntity.ok(response);
-            } else {
-                System.out.println("Authentication failed for: " + user.getUsername());
-                return ResponseEntity.status(401).body("Invalid credentials");
-            }
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Login failed: " + e.getMessage());
+
+        if (user.getUsername() == null || user.getPassword() == null) {
+            return ResponseEntity.badRequest().body("Username and password are required");
         }
+
+        boolean authenticated = userService.authenticate(
+                user.getUsername(),
+                user.getPassword()
+        );
+
+        if (!authenticated) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Invalid credentials");
+        }
+
+        User loggedUser = userService.findByUsername(user.getUsername());
+        userService.setOnlineStatus(user.getUsername(), true);
+
+        String token = jwtUtil.generateToken(user.getUsername());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("token", token);
+        response.put("id", loggedUser.getId());
+        response.put("username", loggedUser.getUsername());
+
+        return ResponseEntity.ok(response);
     }
 
-@PostMapping("/logout")
+    // =========================
+    // LOGOUT (JWT REQUIRED)
+    // =========================
+    @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestBody Map<String, String> request) {
+
         String username = request.get("username");
-        if (username != null) {
-            try {
-                userService.logout(username);
-                return ResponseEntity.ok("Logged out successfully");
-            } catch (Exception e) {
-                return ResponseEntity.status(500).body("Logout failed: " + e.getMessage());
-            }
-        } else {
-            return ResponseEntity.badRequest().body("Username required");
+
+        if (username == null || username.isBlank()) {
+            return ResponseEntity.badRequest().body("Username is required");
         }
+
+        userService.logout(username);
+        return ResponseEntity.ok("Logged out successfully");
     }
 }

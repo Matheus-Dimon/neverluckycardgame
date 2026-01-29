@@ -2,28 +2,20 @@ databases:
   - type: postgres
     name: neverlucky-db
     plan: free
-    branch: master
-    autoDeploy: true
     databaseName: neverlucky
     user: neverlucky_user
-    envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: neverlucky-db
-          property: connectionString
 
 services:
   - type: web
     name: neverlucky-backend
     env: docker
-    branch: master
     plan: free
     rootDir: backend
     dockerfilePath: Dockerfile
     autoDeploy: true
     envVars:
       - key: JWT_SECRET
-        value: "neverlucky-jwt-secret-key-2024-ultra-secure-production-1234567890123456789012345678901234567890"
+        value: "neverlucky-jwt-secret-key-2024-ultra-secure-production-1234567890"
       - key: DATABASE_URL
         fromDatabase:
           name: neverlucky-db
@@ -38,18 +30,3 @@ services:
           property: password
       - key: FRONTEND_URL
         value: "https://neverluckycardgame-qq7diyd3d-matheus-dimons-projects.vercel.app"
-      - key: FRONTEND_URLS
-        value: "https://neverluckycardgame-qq7diyd3d-matheus-dimons-projects.vercel.app"
-
-  - type: web
-    name: neverlucky-frontend
-    env: static
-    branch: master
-    plan: free
-    rootDir: frontend
-    buildCommand: "npm run build"
-    outputDirectory: "dist"
-    autoDeploy: true
-    envVars:
-      - key: VITE_API_BASE_URL
-        value: "https://neverlucky-backend-x0rh.onrender.com/api"
