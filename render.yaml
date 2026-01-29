@@ -4,6 +4,7 @@ databases:
     plan: free
     databaseName: neverlucky
     user: neverlucky_user
+
 services:
   - type: web
     name: neverlucky-backend
