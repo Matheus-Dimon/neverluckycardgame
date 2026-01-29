@@ -13,23 +13,22 @@ const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [tutorialMode, setTutorialMode] = useState(false);
 
-  // Temporarily disabled auto-login to show auth pages
-  // useEffect(() => {
-  //   // Check if user is already logged in on app start
-  //   const savedUser = localStorage.getItem('currentUser');
-  //   if (savedUser) {
-  //     try {
-  //       const userData = JSON.parse(savedUser);
-  //       if (userData.loggedIn) {
-  //         setCurrentUser(userData);
-  //         setIsLoggedIn(true);
-  //         setCurrentScreen('game');
-  //       }
-  //     } catch (error) {
-  //       localStorage.removeItem('currentUser');
-  //     }
-  //   }
-  // }, []);
+  useEffect(() => {
+    // Check if user is already logged in on app start
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+      try {
+        const userData = JSON.parse(savedUser);
+        if (userData.loggedIn) {
+          setCurrentUser(userData);
+          setIsLoggedIn(true);
+          setCurrentScreen('game');
+        }
+      } catch (error) {
+        localStorage.removeItem('currentUser');
+      }
+    }
+  }, []);
 
   const navigateToHome = () => setCurrentScreen('home');
   const navigateToLogin = () => setCurrentScreen('login');

@@ -5,5 +5,10 @@ export default defineConfig({
   plugins: [react()],
   server: {
     open: true
-  }
+  },
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets'
+  },
+  publicDir: 'public'
 });
