@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { GameContext } from '../context/GameContext';
-import { friendAPI, gameAPI } from '../utils/api';
+import { friendsAPI, gameAPI } from '../utils/api';
 import '../styles/styles.css';
 
 const FriendsPage = ({ onBack }) => {
@@ -33,9 +33,9 @@ const FriendsPage = ({ onBack }) => {
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
       const userId = currentUser.id;
       const [friendsData, pendingData, sentData, invitesData] = await Promise.all([
-        friendAPI.getFriends(),
-        friendAPI.getPendingRequests(),
-        friendAPI.getSentRequests(),
+        friendsAPI.getFriends(),
+        friendsAPI.getPendingRequests(),
+        friendsAPI.getSentRequests(),
         userId ? gameAPI.getPendingInvites(userId) : Promise.resolve([])
       ]);
       // Filter out current user from friends list as extra safeguard
@@ -60,7 +60,7 @@ const FriendsPage = ({ onBack }) => {
     try {
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
       const currentUserId = currentUser.id;
-      const results = await friendAPI.searchUsers(query);
+      const results = await friendsAPI.searchUsers(query);
       // Additional frontend filter to ensure current user is not shown
       const filteredResults = results.filter(user => user.id !== currentUserId);
       setSearchResults(filteredResults);
@@ -71,7 +71,7 @@ const FriendsPage = ({ onBack }) => {
 
   const handleSendRequest = async (userId) => {
     try {
-      await friendAPI.sendFriendRequest(userId);
+      await friendsAPI.sendFriendRequest(userId);
       setSuccess('Friend request sent successfully!');
       setSearchResults([]);
       setSearchQuery('');
@@ -83,7 +83,7 @@ const FriendsPage = ({ onBack }) => {
 
   const handleAcceptRequest = async (requestId) => {
     try {
-      await friendAPI.acceptRequest(requestId);
+      await friendsAPI.acceptRequest(requestId);
       setSuccess('Friend request accepted!');
       loadFriendsData(); // Refresh data
     } catch (err) {
@@ -93,7 +93,7 @@ const FriendsPage = ({ onBack }) => {
 
   const handleRejectRequest = async (requestId) => {
     try {
-      await friendAPI.rejectRequest(requestId);
+      await friendsAPI.rejectRequest(requestId);
       setSuccess('Friend request rejected!');
       loadFriendsData(); // Refresh data
     } catch (err) {
@@ -103,7 +103,7 @@ const FriendsPage = ({ onBack }) => {
 
   const handleRemoveFriend = async (friendId) => {
     try {
-      await friendAPI.removeFriend(friendId);
+      await friendsAPI.removeFriend(friendId);
       setSuccess('Friend removed successfully!');
       loadFriendsData(); // Refresh data
     } catch (err) {
