@@ -2,12 +2,13 @@ package com.neverlucky.login.dto;
 
 import lombok.Data;
 import java.util.List;
+import com.neverlucky.login.model.Game;
 
 @Data
 public class GameDTO {
     private Long id;
-    private String gamePhase;
-    private String turn;
+    private Game.GamePhase gamePhase;
+    private Game.Turn turn;
     private Integer turnCount;
     
     // Helper method to get current player key based on turn

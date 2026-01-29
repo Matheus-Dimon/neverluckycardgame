@@ -679,8 +679,8 @@ public class GameService {
     private GameDTO convertToDTO(Game game) {
         GameDTO dto = new GameDTO();
         dto.setId(game.getId());
-        dto.setGamePhase(game.getGamePhase().toString());
-        dto.setTurn(game.getTurn().toString());
+        dto.setGamePhase(game.getGamePhase());
+        dto.setTurn(game.getTurn());
         dto.setTurnCount(game.getTurnCount());
         dto.setGameOver(game.getGameOver());
         dto.setWinner(game.getWinner());
