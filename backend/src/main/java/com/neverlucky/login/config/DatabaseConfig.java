@@ -2,6 +2,7 @@ package com.neverlucky.login.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 import javax.sql.DataSource;
@@ -11,12 +12,24 @@ import java.net.URI;
 public class DatabaseConfig {
 
     @Bean
-    public DataSource dataSource() {
+    @Profile("!production")
+    public DataSource h2DataSource() {
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        dataSource.setDriverClassName("org.h2.Driver");
+        dataSource.setUrl("jdbc:h2:mem:testdb");
+        dataSource.setUsername("sa");
+        dataSource.setPassword("");
+        return dataSource;
+    }
+
+    @Bean
+    @Profile("production")
+    public DataSource postgresqlDataSource() {
         try {
             String databaseUrl = System.getenv("DATABASE_URL");
 
             if (databaseUrl == null || databaseUrl.isBlank()) {
-                throw new IllegalStateException("DATABASE_URL is not set");
+                throw new IllegalStateException("DATABASE_URL is not set in production profile");
             }
 
             URI dbUri = new URI(databaseUrl);
