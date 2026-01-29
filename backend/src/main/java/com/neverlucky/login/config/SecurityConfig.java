@@ -13,6 +13,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Configuration
@@ -29,10 +30,11 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
+                // Public endpoints
                 .requestMatchers("/", "/health").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/api/**").permitAll() // 🔥 libera API para o frontend
+                // All other endpoints require authentication
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
@@ -44,19 +46,35 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // 🔥 padrão correto para Vercel + localhost
-        config.setAllowedOriginPatterns(List.of(
+        // Allow all Vercel deployments and localhost
+        config.setAllowedOriginPatterns(Arrays.asList(
                 "http://localhost:3000",
                 "http://localhost:5173",
-                "https://*.vercel.app"
+                "http://localhost:8080",
+                "https://*.vercel.app",
+                "https://neverluckycardgame*.vercel.app"
         ));
 
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
+        // Allow all HTTP methods
+        config.setAllowedMethods(Arrays.asList(
+                "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"
+        ));
+
+        // Allow all headers
+        config.setAllowedHeaders(Arrays.asList("*"));
+
+        // Allow credentials (important for cookies and auth headers)
         config.setAllowCredentials(true);
+
+        // Cache preflight requests for 1 hour
+        config.setMaxAge(3600L);
+
+        // Expose authorization header
+        config.setExposedHeaders(Arrays.asList("Authorization"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
+        
         return source;
     }
 }

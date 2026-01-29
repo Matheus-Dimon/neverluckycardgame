@@ -13,20 +13,41 @@ services:
     rootDir: backend
     dockerfilePath: Dockerfile
     autoDeploy: true
+    
+    # Health check configuration
+    healthCheckPath: /health
+    
+    # Environment variables
     envVars:
+      - key: PORT
+        value: "8080"
+      
+      - key: SPRING_PROFILES_ACTIVE
+        value: "prod"
+      
       - key: JWT_SECRET
         value: "neverlucky-jwt-secret-key-2024-ultra-secure-production-1234567890"
+      
+      # Database connection (automatically configured by Render)
       - key: DATABASE_URL
         fromDatabase:
           name: neverlucky-db
           property: connectionString
+      
       - key: DB_USER
         fromDatabase:
           name: neverlucky-db
           property: user
+      
       - key: DB_PASSWORD
         fromDatabase:
           name: neverlucky-db
           property: password
+      
+      # Frontend URLs for CORS
+      # IMPORTANTE: Atualize com a URL real do seu frontend no Vercel
       - key: FRONTEND_URL
         value: "https://neverluckycardgame-qq7diyd3d-matheus-dimons-projects.vercel.app"
+      
+      - key: FRONTEND_URLS
+        value: "https://neverluckycardgame-qq7diyd3d-matheus-dimons-projects.vercel.app,https://*.vercel.app,http://localhost:3000,http://localhost:5173"
