@@ -46,13 +46,13 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // Allow all Vercel deployments and localhost
+        // Allow specific origins including the Vercel deployment
         config.setAllowedOriginPatterns(Arrays.asList(
                 "http://localhost:3000",
-                "http://localhost:5173",
+                "http://localhost:5173", 
                 "http://localhost:8080",
                 "https://*.vercel.app",
-                "https://neverluckycardgame*.vercel.app"
+                "https://neverluckycardgame-qhs9p5mhm-matheus-dimons-projects.vercel.app"
         ));
 
         // Allow all HTTP methods
