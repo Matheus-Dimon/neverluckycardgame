@@ -10,5 +10,15 @@ export default defineConfig({
     outDir: 'dist',
     assetsDir: 'assets'
   },
-  buildIndex: 'index.html'
+  resolve: {
+    alias: {
+      '@': '/src'
+    }
+  },
+  root: '.',
+  build: {
+    rollupOptions: {
+      input: './index.html'
+    }
+  }
 });
