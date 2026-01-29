@@ -29,6 +29,9 @@ public class SecurityConfig {
     @Value("${FRONTEND_URLS:}")
     private String frontendUrls; // optional comma-separated additional origins
 
+    @Value("${VERCEL_URL:}")
+    private String vercelUrl;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -48,17 +51,20 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         // allow configured frontend and common localhost dev ports
-        List<String> origins = Arrays.asList(frontendUrl, "http://localhost:3000", "http://localhost:5173");
-        if (frontendUrls != null && !frontendUrls.isBlank()) {
-            String[] extra = frontendUrls.split(",");
-            for (String e : extra) {
-                if (!e.isBlank()) origins.add(e.trim());
-            }
-        }
-        configuration.setAllowedOriginPatterns(origins);
+List<String> origins = Arrays.asList(frontendUrl, "http://localhost:3000", "http://localhost:5173");
+if (vercelUrl != null && !vercelUrl.isBlank()) {
+    origins.add(vercelUrl);
+}
+if (frontendUrls != null && !frontendUrls.isBlank()) {
+    String[] extra = frontendUrls.split(",");
+    for (String e : extra) {
+        if (!e.isBlank()) origins.add(e.trim());
+    }
+}
+configuration.setAllowedOriginPatterns(origins);
+configuration.setAllowCredentials(true);
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowCredentials(false);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

@@ -1,50 +1,69 @@
+import axios from 'axios';
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081/api';
 
-const getAuthHeaders = () => {
-  const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-  const token = currentUser.token;
-  return token ? { Authorization: `Bearer ${token}` } : {};
-};
-
-export const apiRequest = async (endpoint, options = {}) => {
-  const url = `${API_BASE_URL}${endpoint}`;
-  const headers = {
-    'Content-Type': 'application/json',
-    ...getAuthHeaders(),
-    ...options.headers,
-  };
-
-  const response = await fetch(url, {
-    ...options,
-    headers,
-  });
-
-  if (!response.ok) {
-    const errorData = await response.text();
-    throw new Error(errorData || `HTTP error! status: ${response.status}`);
+const instance = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json'
   }
+});
 
-  return response.json();
+// Request interceptor to add JWT token
+instance.interceptors.request.use(
+  (config) => {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    const token = currentUser.token;
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor to handle errors
+instance.interceptors.response.use(
+  (response) => response.data,
+  (error) => {
+    if (error.response) {
+      const errorMessage = error.response.data || `HTTP error! status: ${error.response.status}`;
+      throw new Error(errorMessage);
+    } else if (error.request) {
+      throw new Error('Network error - no response received');
+    } else {
+      throw new Error('Error setting up the request');
+    }
+  }
+);
+
+export const apiRequest = (endpoint, options = {}) => {
+  return instance.request({
+    url: endpoint,
+    ...options
+  });
 };
 
 export const authAPI = {
   login: (username, password) => apiRequest('/auth/login', {
     method: 'POST',
-    body: JSON.stringify({ username, password })
+    data: { username, password }
   }),
   register: (username, password) => apiRequest('/auth/register', {
     method: 'POST',
-    body: JSON.stringify({ username, password })
+    data: { username, password }
   }),
   logout: (username) => apiRequest('/auth/logout', {
     method: 'POST',
-    body: JSON.stringify({ username })
+    data: { username }
   })
 };
 
 // Friend-related API calls
 export const friendAPI = {
-  searchUsers: (query) => apiRequest(`/friends/search?query=${encodeURIComponent(query)}`),
+  searchUsers: (query) => apiRequest(`/friends/search?query=${encodeURIComponent(query)}`, { method: 'GET' }),
 
   sendFriendRequest: (receiverId) => apiRequest(`/friends/request/${receiverId}`, { method: 'POST' }),
 

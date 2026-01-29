@@ -37,9 +37,9 @@ services:
           name: neverlucky-db
           property: password
       - key: FRONTEND_URL
-        value: "https://your-frontend.vercel.app"
+        value: "https://neverluckycardgame-qq7diyd3d-matheus-dimons-projects.vercel.app"
       - key: FRONTEND_URLS
-        value: "https://your-frontend.vercel.app,https://your-frontend.netlify.app"
+        value: "https://neverluckycardgame-qq7diyd3d-matheus-dimons-projects.vercel.app"
 
   - type: web
     name: neverlucky-frontend
