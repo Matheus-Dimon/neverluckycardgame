@@ -1,4 +1,4 @@
-import { API_BASE_URL, apiRequest } from '../config/api.js';
+import { apiRequest } from '../config/api.js';
 
 // Sistema de autenticação
 export const authAPI = {

@@ -2,7 +2,7 @@
   "name": "neverlucky-cardgame",
   "version": "1.0.0",
   "private": true,
-"scripts": {
+  "scripts": {
     "dev": "vite",
     "prebuild": "chmod +x ./node_modules/.bin/vite || true",
     "build": "vite build",
