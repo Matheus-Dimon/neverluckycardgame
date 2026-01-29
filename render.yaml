@@ -1,4 +1,4 @@
-services:
+databases:
   - type: postgres
     name: neverlucky-db
     plan: free
@@ -12,6 +12,7 @@ services:
           name: neverlucky-db
           property: connectionString
 
+services:
   - type: web
     name: neverlucky-backend
     env: docker
