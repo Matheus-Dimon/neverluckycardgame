@@ -6,6 +6,7 @@ import com.neverlucky.login.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -13,6 +14,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
+@CrossOrigin
 public class AuthController {
 
     @Autowired
@@ -25,31 +27,40 @@ public class AuthController {
     // REGISTER
     // =========================
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User user) {
+    public ResponseEntity<Map<String, Object>> register(@RequestBody User user) {
+        Map<String, Object> response = new HashMap<>();
+
         if (user.getUsername() == null || user.getUsername().isBlank()) {
-            return ResponseEntity.badRequest().body("Username is required");
+            response.put("error", "Username is required");
+            return ResponseEntity.badRequest().body(response);
         }
 
         if (user.getPassword() == null || user.getPassword().isBlank()) {
-            return ResponseEntity.badRequest().body("Password is required");
+            response.put("error", "Password is required");
+            return ResponseEntity.badRequest().body(response);
         }
 
         if (userService.findByUsername(user.getUsername()) != null) {
-            return ResponseEntity.badRequest().body("Username already exists");
+            response.put("error", "Username already exists");
+            return ResponseEntity.badRequest().body(response);
         }
 
         userService.register(user);
-        return ResponseEntity.ok("User registered successfully");
+
+        response.put("message", "User registered successfully");
+        return ResponseEntity.ok(response);
     }
 
     // =========================
     // LOGIN
     // =========================
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody User user) {
+    public ResponseEntity<Map<String, Object>> login(@RequestBody User user) {
+        Map<String, Object> response = new HashMap<>();
 
         if (user.getUsername() == null || user.getPassword() == null) {
-            return ResponseEntity.badRequest().body("Username and password are required");
+            response.put("error", "Username and password are required");
+            return ResponseEntity.badRequest().body(response);
         }
 
         boolean authenticated = userService.authenticate(
@@ -58,8 +69,8 @@ public class AuthController {
         );
 
         if (!authenticated) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("Invalid credentials");
+            response.put("error", "Invalid credentials");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
 
         User loggedUser = userService.findByUsername(user.getUsername());
@@ -67,7 +78,6 @@ public class AuthController {
 
         String token = jwtUtil.generateToken(user.getUsername());
 
-        Map<String, Object> response = new HashMap<>();
         response.put("token", token);
         response.put("id", loggedUser.getId());
         response.put("username", loggedUser.getUsername());
@@ -79,15 +89,18 @@ public class AuthController {
     // LOGOUT (JWT REQUIRED)
     // =========================
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestBody Map<String, String> request) {
+    public ResponseEntity<Map<String, Object>> logout(Authentication authentication) {
+        Map<String, Object> response = new HashMap<>();
 
-        String username = request.get("username");
-
-        if (username == null || username.isBlank()) {
-            return ResponseEntity.badRequest().body("Username is required");
+        if (authentication == null) {
+            response.put("error", "Unauthorized");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
 
+        String username = authentication.getName();
         userService.logout(username);
-        return ResponseEntity.ok("Logged out successfully");
+
+        response.put("message", "Logged out successfully");
+        return ResponseEntity.ok(response);
     }
 }
