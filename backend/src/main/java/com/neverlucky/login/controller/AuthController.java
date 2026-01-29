@@ -19,13 +19,22 @@ public class AuthController {
         return ResponseEntity.ok("Test endpoint works");
     }
 
+    @GetMapping("/")
+    public ResponseEntity<Map<String, Object>> healthCheck() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "UP");
+        response.put("service", "NeverLucky Card Game Backend");
+        response.put("timestamp", System.currentTimeMillis());
+        return ResponseEntity.ok(response);
+    }
+
     @Autowired
     private UserService userService;
 
     @Autowired
     private JwtUtil jwtUtil;
 
-    @PostMapping("/register")
+@PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody User user) {
         try {
             if (user.getUsername() == null || user.getUsername().trim().isEmpty()) {
@@ -40,11 +49,11 @@ public class AuthController {
             userService.register(user);
             return ResponseEntity.ok("User registered successfully");
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Registration failed: " + e.getMessage());
+            return ResponseEntity.status(500).body("Registration failed: " + e.getMessage());
         }
     }
 
-    @PostMapping("/login")
+@PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User user) {
         try {
             if (user.getUsername() == null || user.getUsername().trim().isEmpty()) {
@@ -66,19 +75,23 @@ public class AuthController {
                 return ResponseEntity.ok(response);
             } else {
                 System.out.println("Authentication failed for: " + user.getUsername());
-                return ResponseEntity.badRequest().body("Invalid credentials");
+                return ResponseEntity.status(401).body("Invalid credentials");
             }
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Login failed: " + e.getMessage());
+            return ResponseEntity.status(500).body("Login failed: " + e.getMessage());
         }
     }
 
-    @PostMapping("/logout")
+@PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestBody Map<String, String> request) {
         String username = request.get("username");
         if (username != null) {
-            userService.logout(username);
-            return ResponseEntity.ok("Logged out successfully");
+            try {
+                userService.logout(username);
+                return ResponseEntity.ok("Logged out successfully");
+            } catch (Exception e) {
+                return ResponseEntity.status(500).body("Logout failed: " + e.getMessage());
+            }
         } else {
             return ResponseEntity.badRequest().body("Username required");
         }

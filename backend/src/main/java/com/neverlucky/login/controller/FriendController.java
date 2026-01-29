@@ -37,14 +37,14 @@ public class FriendController {
         return ResponseEntity.ok(users);
     }
 
-    @PostMapping("/request/{receiverId}")
+@PostMapping("/request/{receiverId}")
     public ResponseEntity<?> sendFriendRequest(@PathVariable Long receiverId, Authentication authentication) {
         try {
             User sender = getCurrentUser(authentication);
             User receiver = userService.findById(receiverId).orElse(null);
 
             if (receiver == null) {
-                return ResponseEntity.badRequest().body("User not found");
+                return ResponseEntity.status(404).body("User not found");
             }
 
             if (sender.getId().equals(receiverId)) {
@@ -55,10 +55,10 @@ public class FriendController {
             if (request.isPresent()) {
                 return ResponseEntity.ok("Friend request sent");
             } else {
-                return ResponseEntity.badRequest().body("Friend request already exists or users are already friends");
+                return ResponseEntity.status(409).body("Friend request already exists or users are already friends");
             }
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Failed to send friend request: " + e.getMessage());
+            return ResponseEntity.status(500).body("Failed to send friend request: " + e.getMessage());
         }
     }
 

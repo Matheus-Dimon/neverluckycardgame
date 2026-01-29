@@ -30,6 +30,11 @@ instance.interceptors.response.use(
   (error) => {
     if (error.response) {
       const errorMessage = error.response.data || `HTTP error! status: ${error.response.status}`;
+      if (error.response.status === 401 || error.response.status === 403) {
+        // Handle authentication errors
+        localStorage.removeItem('currentUser');
+        // You could also redirect to login page here
+      }
       throw new Error(errorMessage);
     } else if (error.request) {
       throw new Error('Network error - no response received');
