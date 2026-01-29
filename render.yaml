@@ -40,3 +40,16 @@ services:
         value: "https://your-frontend.vercel.app"
       - key: FRONTEND_URLS
         value: "https://your-frontend.vercel.app,https://your-frontend.netlify.app"
+
+  - type: web
+    name: neverlucky-frontend
+    env: static
+    branch: master
+    plan: free
+    rootDir: frontend
+    buildCommand: "npm run build"
+    outputDirectory: "dist"
+    autoDeploy: true
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: "https://neverlucky-backend.onrender.com/api"
