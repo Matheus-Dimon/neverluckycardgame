@@ -55,7 +55,10 @@ public class SecurityConfig {
                 "https://neverluckycardgame-qhs9p5mhm-matheus-dimons-projects.vercel.app",
                 "https://neverluckycardgame-qq7diyd3d-matheus-dimons-projects.vercel.app",
                 "https://neverluckycardgame-2bln9gesk-matheus-dimons-projects.vercel.app",
-                "https://neverluckycardgame.vercel.app"
+                "https://neverluckycardgame.vercel.app",
+                "neverluckycardgame-matheus-dimons-projects.vercel.app",
+                "neverluckycardgame-git-master-matheus-dimons-projects.vercel.app",
+                "https://neverluckycardgame-bn2n8mkm1-matheus-dimons-projects.vercel.app"
         ));
 
         // Allow all HTTP methods

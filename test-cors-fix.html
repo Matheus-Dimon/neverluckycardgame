@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CORS Test - NeverLucky Backend</title>
+    <title>CORS Fix Test</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -16,24 +16,17 @@
             background: white;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .test-section {
-            margin-bottom: 20px;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .status {
-            font-weight: bold;
-            padding: 5px 10px;
+            padding: 10px;
+            margin: 10px 0;
             border-radius: 4px;
-            display: inline-block;
-            margin-bottom: 10px;
+            font-weight: bold;
         }
-        .success { background-color: #d4edda; color: #155724; }
-        .error { background-color: #f8d7da; color: #721c24; }
-        .info { background-color: #d1ecf1; color: #0c5460; }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
         button {
             background-color: #007bff;
             color: white;
@@ -42,179 +35,143 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
+            margin: 5px;
         }
-        button:hover {
-            background-color: #0056b3;
-        }
+        button:hover { background-color: #0056b3; }
         pre {
             background-color: #f8f9fa;
             padding: 10px;
             border-radius: 4px;
             overflow-x: auto;
+            border: 1px solid #dee2e6;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🧪 CORS Test - NeverLucky Backend</h1>
-        <p>Este script testa se as configurações de CORS estão funcionando corretamente.</p>
+        <h1>🔧 CORS Fix Test</h1>
+        <p>Testing the fixes for CORS errors and JavaScript syntax issues.</p>
         
-        <div class="test-section">
-            <h3>1. Teste de Health Check</h3>
-            <p>Verifica se o backend está respondendo e se o CORS está configurado corretamente.</p>
-            <button onclick="testHealthCheck()">Testar Health Check</button>
-            <div id="health-result" class="status info">Aguardando...</div>
-            <pre id="health-response"></pre>
+        <div id="status" class="status info">Checking environment...</div>
+        
+        <div style="margin: 20px 0;">
+            <button onclick="testBackendHealth()">Test Backend Health</button>
+            <button onclick="testCORS()">Test CORS Request</button>
+            <button onclick="testRegistration()">Test Registration (CORS)</button>
+            <button onclick="clearResults()">Clear Results</button>
         </div>
-
-        <div class="test-section">
-            <h3>2. Teste de Login (CORS)</h3>
-            <p>Testa se as requisições CORS para login estão funcionando.</p>
-            <button onclick="testLogin()">Testar Login (CORS)</button>
-            <div id="login-result" class="status info">Aguardando...</div>
-            <pre id="login-response"></pre>
-        </div>
-
-        <div class="test-section">
-            <h3>3. Teste de Preflight OPTIONS</h3>
-            <p>Testa se as requisições OPTIONS (preflight) estão sendo tratadas corretamente.</p>
-            <button onclick="testOptions()">Testar OPTIONS</button>
-            <div id="options-result" class="status info">Aguardando...</div>
-            <pre id="options-response"></pre>
-        </div>
-
-        <div class="test-section">
-            <h3>Configurações Atuais</h3>
-            <p><strong>URL do Backend:</strong> <span id="backend-url"></span></p>
-            <p><strong>Origem Atual:</strong> <span id="current-origin"></span></p>
-        </div>
+        
+        <div id="results"></div>
     </div>
 
     <script>
-        // Configurações
-        const BACKEND_URL = 'https://neverlucky-backend.onrender.com';
-        const API_BASE_URL = BACKEND_URL;
+        const API_BASE_URL = 'https://neverlucky-backend.onrender.com';
         
-        // Atualizar informações na página
-        document.getElementById('backend-url').textContent = BACKEND_URL;
-        document.getElementById('current-origin').textContent = window.location.origin;
-
-        async function testHealthCheck() {
-            const resultDiv = document.getElementById('health-result');
-            const responseDiv = document.getElementById('health-response');
-            
-            resultDiv.className = 'status info';
-            resultDiv.textContent = 'Testando...';
-            responseDiv.textContent = '';
+        function addResult(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}:</strong> ${message}`;
+            results.appendChild(div);
+            results.scrollTop = results.scrollHeight;
+        }
+        
+        function updateStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.className = `status ${type}`;
+            status.innerHTML = `<strong>Status:</strong> ${message}`;
+        }
+        
+        async function testBackendHealth() {
+            updateStatus('Testing backend health...', 'info');
+            addResult('Testing backend health check endpoint...', 'info');
             
             try {
-                const response = await fetch(`${API_BASE_URL}/health`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                });
-
-                const data = await response.text();
-                
+                const response = await fetch(`${API_BASE_URL}/health`);
                 if (response.ok) {
-                    resultDiv.className = 'status success';
-                    resultDiv.textContent = '✅ Health Check Bem-sucedido';
-                    responseDiv.textContent = `Status: ${response.status}\nResposta: ${data}`;
+                    const data = await response.json();
+                    addResult(`✅ Backend is healthy: ${JSON.stringify(data)}`, 'success');
+                    updateStatus('Backend is healthy', 'success');
                 } else {
-                    resultDiv.className = 'status error';
-                    resultDiv.textContent = `❌ Health Check Falhou - Status: ${response.status}`;
-                    responseDiv.textContent = `Status: ${response.status}\nResposta: ${data}`;
+                    addResult(`❌ Backend health check failed: ${response.status} ${response.statusText}`, 'error');
+                    updateStatus('Backend health check failed', 'error');
                 }
             } catch (error) {
-                resultDiv.className = 'status error';
-                resultDiv.textContent = `❌ Erro de Rede: ${error.message}`;
-                responseDiv.textContent = `Erro: ${error.message}`;
+                addResult(`❌ Network error: ${error.message}`, 'error');
+                updateStatus('Network error occurred', 'error');
             }
         }
-
-        async function testLogin() {
-            const resultDiv = document.getElementById('login-result');
-            const responseDiv = document.getElementById('login-response');
-            
-            resultDiv.className = 'status info';
-            resultDiv.textContent = 'Testando...';
-            responseDiv.textContent = '';
+        
+        async function testCORS() {
+            updateStatus('Testing CORS configuration...', 'info');
+            addResult('Testing CORS with OPTIONS request...', 'info');
             
             try {
-                const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+                const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Origin': window.location.origin,
+                        'Access-Control-Request-Method': 'POST',
+                        'Access-Control-Request-Headers': 'Content-Type'
+                    }
+                });
+                
+                if (response.ok) {
+                    addResult(`✅ CORS preflight successful: ${response.status}`, 'success');
+                    updateStatus('CORS preflight successful', 'success');
+                } else {
+                    addResult(`❌ CORS preflight failed: ${response.status} ${response.statusText}`, 'error');
+                    updateStatus('CORS preflight failed', 'error');
+                }
+            } catch (error) {
+                addResult(`❌ CORS test error: ${error.message}`, 'error');
+                updateStatus('CORS test failed', 'error');
+            }
+        }
+        
+        async function testRegistration() {
+            updateStatus('Testing registration endpoint...', 'info');
+            addResult('Testing registration endpoint with CORS...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Origin': window.location.origin
                     },
                     body: JSON.stringify({
-                        username: 'testuser',
-                        password: 'testpassword'
+                        username: 'testuser_' + Date.now(),
+                        password: 'testpassword123'
                     })
-                });
-
-                const data = await response.text();
-                
-                // Mesmo que o login falhe (usuário não existe), o importante é que o CORS esteja funcionando
-                if (response.status === 401 || response.status === 400) {
-                    resultDiv.className = 'status success';
-                    resultDiv.textContent = '✅ CORS Funcionando (Login rejeitado corretamente)';
-                    responseDiv.textContent = `Status: ${response.status}\nResposta: ${data}`;
-                } else if (response.ok) {
-                    resultDiv.className = 'status success';
-                    resultDiv.textContent = '✅ Login Bem-sucedido';
-                    responseDiv.textContent = `Status: ${response.status}\nResposta: ${data}`;
-                } else {
-                    resultDiv.className = 'status error';
-                    resultDiv.textContent = `❌ Erro inesperado - Status: ${response.status}`;
-                    responseDiv.textContent = `Status: ${response.status}\nResposta: ${data}`;
-                }
-            } catch (error) {
-                resultDiv.className = 'status error';
-                resultDiv.textContent = `❌ Erro de Rede: ${error.message}`;
-                responseDiv.textContent = `Erro: ${error.message}`;
-            }
-        }
-
-        async function testOptions() {
-            const resultDiv = document.getElementById('options-result');
-            const responseDiv = document.getElementById('options-response');
-            
-            resultDiv.className = 'status info';
-            resultDiv.textContent = 'Testando...';
-            responseDiv.textContent = '';
-            
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-                    method: 'OPTIONS',
-                    headers: {
-                        'Access-Control-Request-Method': 'POST',
-                        'Access-Control-Request-Headers': 'Content-Type',
-                        'Origin': window.location.origin
-                    }
-                });
-
-                const headers = {};
-                response.headers.forEach((value, key) => {
-                    headers[key] = value;
                 });
                 
                 if (response.ok) {
-                    resultDiv.className = 'status success';
-                    resultDiv.textContent = '✅ Preflight OPTIONS Bem-sucedido';
-                    responseDiv.textContent = `Status: ${response.status}\nHeaders:\n${JSON.stringify(headers, null, 2)}`;
+                    const data = await response.json();
+                    addResult(`✅ Registration successful: ${JSON.stringify(data)}`, 'success');
+                    updateStatus('Registration endpoint working', 'success');
                 } else {
-                    resultDiv.className = 'status error';
-                    resultDiv.textContent = `❌ Preflight OPTIONS Falhou - Status: ${response.status}`;
-                    responseDiv.textContent = `Status: ${response.status}\nHeaders:\n${JSON.stringify(headers, null, 2)}`;
+                    const errorText = await response.text();
+                    addResult(`⚠️ Registration response: ${response.status} ${response.statusText}. Error: ${errorText || 'No error message'}`, 'info');
+                    updateStatus('Registration endpoint responded', 'info');
                 }
             } catch (error) {
-                resultDiv.className = 'status error';
-                resultDiv.textContent = `❌ Erro de Rede: ${error.message}`;
-                responseDiv.textContent = `Erro: ${error.message}`;
+                addResult(`❌ Registration test error: ${error.message}`, 'error');
+                updateStatus('Registration test failed', 'error');
             }
         }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+            updateStatus('Results cleared', 'info');
+        }
+        
+        // Test environment on load
+        window.onload = function() {
+            addResult(`Current origin: ${window.location.origin}`, 'info');
+            addResult(`API Base URL: ${API_BASE_URL}`, 'info');
+            addResult('Environment check complete. Ready to test.', 'success');
+        };
     </script>
 </body>
 </html>

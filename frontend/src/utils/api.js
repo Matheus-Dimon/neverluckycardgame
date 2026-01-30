@@ -1,3 +1,4 @@
+// Import the API functions from config
 import { apiRequest, authenticatedRequest, checkBackendHealth } from '../config/api.js';
 
 // Sistema de autenticação
