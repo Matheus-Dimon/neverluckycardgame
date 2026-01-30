@@ -46,18 +46,20 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // Allow specific origins including the Vercel deployment
+        // Allow all Vercel deployment URLs with pattern matching
         config.setAllowedOriginPatterns(Arrays.asList(
                 "http://localhost:3000",
                 "http://localhost:5173", 
                 "http://localhost:8080",
                 "https://*.vercel.app",
+                // Adicione seu domínio específico do Vercel
+                "https://neverluckycardgame-jqhgd1u0k-matheus-dimons-projects.vercel.app",
                 "https://neverluckycardgame-qhs9p5mhm-matheus-dimons-projects.vercel.app",
                 "https://neverluckycardgame-qq7diyd3d-matheus-dimons-projects.vercel.app",
                 "https://neverluckycardgame-2bln9gesk-matheus-dimons-projects.vercel.app",
                 "https://neverluckycardgame.vercel.app",
-                "neverluckycardgame-matheus-dimons-projects.vercel.app",
-                "neverluckycardgame-git-master-matheus-dimons-projects.vercel.app",
+                "https://neverluckycardgame-matheus-dimons-projects.vercel.app",
+                "https://neverluckycardgame-git-master-matheus-dimons-projects.vercel.app",
                 "https://neverluckycardgame-bn2n8mkm1-matheus-dimons-projects.vercel.app"
         ));
 
@@ -84,3 +86,5 @@ public class SecurityConfig {
         return source;
     }
 }
+
+
