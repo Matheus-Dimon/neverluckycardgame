@@ -1,4 +1,4 @@
-import { apiRequest } from '../config/api.js';
+import { apiRequest, authenticatedRequest, checkBackendHealth } from '../config/api.js';
 
 // Sistema de autenticação
 export const authAPI = {
