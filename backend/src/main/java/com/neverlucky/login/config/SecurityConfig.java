@@ -52,7 +52,8 @@ public class SecurityConfig {
                 "http://localhost:5173", 
                 "http://localhost:8080",
                 "https://*.vercel.app",
-                "https://neverluckycardgame-qhs9p5mhm-matheus-dimons-projects.vercel.app"
+                "https://neverluckycardgame-qhs9p5mhm-matheus-dimons-projects.vercel.app",
+                "neverluckycardgame.vercel.app"
         ));
 
         // Allow all HTTP methods
