@@ -76,7 +76,7 @@ public class SecurityConfig {
         config.setMaxAge(3600L);
 
         // Expose authorization header
-        config.setExposedHeaders(Arrays.asList("Authorization"));
+        config.setExposedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

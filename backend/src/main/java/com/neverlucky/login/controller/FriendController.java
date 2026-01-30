@@ -16,7 +16,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/friends")
-@CrossOrigin
 public class FriendController {
 
     @Autowired

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CORS Fix Test</title>
+    <title>CORS Test - NeverLucky Backend</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -18,15 +18,32 @@
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .status {
-            padding: 10px;
-            margin: 10px 0;
+        .test-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
             border-radius: 4px;
-            font-weight: bold;
         }
-        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
         button {
             background-color: #007bff;
             color: white;
@@ -35,143 +52,244 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
-            margin: 5px;
         }
-        button:hover { background-color: #0056b3; }
-        pre {
-            background-color: #f8f9fa;
-            padding: 10px;
+        button:hover {
+            background-color: #0056b3;
+        }
+        input, select {
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
             border-radius: 4px;
-            overflow-x: auto;
-            border: 1px solid #dee2e6;
+            width: 100%;
+            box-sizing: border-box;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🔧 CORS Fix Test</h1>
-        <p>Testing the fixes for CORS errors and JavaScript syntax issues.</p>
+        <h1>🔧 CORS Configuration Test</h1>
+        <p>Test the CORS configuration for NeverLucky Backend API</p>
         
-        <div id="status" class="status info">Checking environment...</div>
-        
-        <div style="margin: 20px 0;">
-            <button onclick="testBackendHealth()">Test Backend Health</button>
-            <button onclick="testCORS()">Test CORS Request</button>
-            <button onclick="testRegistration()">Test Registration (CORS)</button>
-            <button onclick="clearResults()">Clear Results</button>
+        <div class="test-section">
+            <h3>1. Test Health Check (GET)</h3>
+            <p>Testing basic connectivity to the backend</p>
+            <button onclick="testHealthCheck()">Test Health Check</button>
+            <div id="health-result" class="result"></div>
         </div>
-        
-        <div id="results"></div>
+
+        <div class="test-section">
+            <h3>2. Test OPTIONS Preflight (CORS)</h3>
+            <p>Testing OPTIONS request to check CORS headers</p>
+            <button onclick="testOptions()">Test OPTIONS Preflight</button>
+            <div id="options-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>3. Test Registration (POST)</h3>
+            <p>Testing POST request with CORS headers</p>
+            <input type="text" id="test-username" placeholder="Test Username" value="testuser_cors">
+            <input type="password" id="test-password" placeholder="Test Password" value="testpass123">
+            <button onclick="testRegistration()">Test Registration</button>
+            <div id="register-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>4. Test Login (POST)</h3>
+            <p>Testing login with CORS headers</p>
+            <input type="text" id="login-username" placeholder="Username" value="testuser_cors">
+            <input type="password" id="login-password" placeholder="Password" value="testpass123">
+            <button onclick="testLogin()">Test Login</button>
+            <div id="login-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>5. Test with Different Origins</h3>
+            <p>Simulate requests from different origins</p>
+            <select id="origin-select">
+                <option value="http://localhost:3000">http://localhost:3000</option>
+                <option value="http://localhost:5173">http://localhost:5173</option>
+                <option value="https://neverluckycardgame.vercel.app">Vercel App</option>
+                <option value="https://example.com">Blocked Origin (example.com)</option>
+            </select>
+            <button onclick="testWithOrigin()">Test with Selected Origin</button>
+            <div id="origin-result" class="result"></div>
+        </div>
     </div>
 
     <script>
-        const API_BASE_URL = 'https://neverlucky-backend.onrender.com';
+        // Backend URL - adjust this to your backend URL
+        const BACKEND_URL = 'https://neverlucky-backend.onrender.com';
         
-        function addResult(message, type = 'info') {
-            const results = document.getElementById('results');
-            const div = document.createElement('div');
-            div.className = `status ${type}`;
-            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}:</strong> ${message}`;
-            results.appendChild(div);
-            results.scrollTop = results.scrollHeight;
+        function showResult(elementId, message, isSuccess) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = message;
+            element.className = 'result ' + (isSuccess ? 'success' : 'error');
         }
-        
-        function updateStatus(message, type = 'info') {
-            const status = document.getElementById('status');
-            status.className = `status ${type}`;
-            status.innerHTML = `<strong>Status:</strong> ${message}`;
+
+        function showInfo(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = message;
+            element.className = 'result info';
         }
-        
-        async function testBackendHealth() {
-            updateStatus('Testing backend health...', 'info');
-            addResult('Testing backend health check endpoint...', 'info');
+
+        async function testHealthCheck() {
+            showInfo('health-result', 'Testing health check...');
             
             try {
-                const response = await fetch(`${API_BASE_URL}/health`);
-                if (response.ok) {
-                    const data = await response.json();
-                    addResult(`✅ Backend is healthy: ${JSON.stringify(data)}`, 'success');
-                    updateStatus('Backend is healthy', 'success');
-                } else {
-                    addResult(`❌ Backend health check failed: ${response.status} ${response.statusText}`, 'error');
-                    updateStatus('Backend health check failed', 'error');
-                }
+                const response = await fetch(`${BACKEND_URL}/health`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                const headers = Object.fromEntries(response.headers.entries());
+                
+                let message = `<strong>Response:</strong> ${JSON.stringify(data, null, 2)}<br>`;
+                message += `<strong>Status:</strong> ${response.status} ${response.statusText}<br>`;
+                message += `<strong>Headers:</strong><br>`;
+                Object.keys(headers).forEach(key => {
+                    message += `  ${key}: ${headers[key]}<br>`;
+                });
+
+                showResult('health-result', message, response.ok);
             } catch (error) {
-                addResult(`❌ Network error: ${error.message}`, 'error');
-                updateStatus('Network error occurred', 'error');
+                showResult('health-result', `Error: ${error.message}`, false);
             }
         }
-        
-        async function testCORS() {
-            updateStatus('Testing CORS configuration...', 'info');
-            addResult('Testing CORS with OPTIONS request...', 'info');
+
+        async function testOptions() {
+            showInfo('options-result', 'Testing OPTIONS preflight...');
             
             try {
-                const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+                const response = await fetch(`${BACKEND_URL}/api/auth/register`, {
                     method: 'OPTIONS',
                     headers: {
-                        'Origin': window.location.origin,
+                        'Origin': 'http://localhost:3000',
                         'Access-Control-Request-Method': 'POST',
                         'Access-Control-Request-Headers': 'Content-Type'
                     }
                 });
+
+                const headers = Object.fromEntries(response.headers.entries());
                 
-                if (response.ok) {
-                    addResult(`✅ CORS preflight successful: ${response.status}`, 'success');
-                    updateStatus('CORS preflight successful', 'success');
-                } else {
-                    addResult(`❌ CORS preflight failed: ${response.status} ${response.statusText}`, 'error');
-                    updateStatus('CORS preflight failed', 'error');
-                }
+                let message = `<strong>Status:</strong> ${response.status} ${response.statusText}<br>`;
+                message += `<strong>Headers:</strong><br>`;
+                Object.keys(headers).forEach(key => {
+                    message += `  ${key}: ${headers[key]}<br>`;
+                });
+
+                // Check for CORS headers
+                const hasCORS = headers['access-control-allow-origin'] || headers['access-control-allow-origin-patterns'];
+                const hasMethods = headers['access-control-allow-methods'];
+                const hasHeaders = headers['access-control-allow-headers'];
+                
+                message += `<br><strong>CORS Analysis:</strong><br>`;
+                message += `  Access-Control-Allow-Origin: ${hasCORS ? '✅ Present' : '❌ Missing'}<br>`;
+                message += `  Access-Control-Allow-Methods: ${hasMethods ? '✅ Present' : '❌ Missing'}<br>`;
+                message += `  Access-Control-Allow-Headers: ${hasHeaders ? '✅ Present' : '❌ Missing'}<br>`;
+
+                showResult('options-result', message, response.ok && hasCORS);
             } catch (error) {
-                addResult(`❌ CORS test error: ${error.message}`, 'error');
-                updateStatus('CORS test failed', 'error');
+                showResult('options-result', `Error: ${error.message}`, false);
             }
         }
-        
+
         async function testRegistration() {
-            updateStatus('Testing registration endpoint...', 'info');
-            addResult('Testing registration endpoint with CORS...', 'info');
+            showInfo('register-result', 'Testing registration...');
             
+            const username = document.getElementById('test-username').value;
+            const password = document.getElementById('test-password').value;
+
             try {
-                const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+                const response = await fetch(`${BACKEND_URL}/api/auth/register`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Origin': window.location.origin
+                        'Origin': 'http://localhost:3000'
                     },
                     body: JSON.stringify({
-                        username: 'testuser_' + Date.now(),
-                        password: 'testpassword123'
+                        username: username,
+                        password: password
                     })
                 });
+
+                const data = await response.json();
                 
-                if (response.ok) {
-                    const data = await response.json();
-                    addResult(`✅ Registration successful: ${JSON.stringify(data)}`, 'success');
-                    updateStatus('Registration endpoint working', 'success');
-                } else {
-                    const errorText = await response.text();
-                    addResult(`⚠️ Registration response: ${response.status} ${response.statusText}. Error: ${errorText || 'No error message'}`, 'info');
-                    updateStatus('Registration endpoint responded', 'info');
-                }
+                let message = `<strong>Response:</strong> ${JSON.stringify(data, null, 2)}<br>`;
+                message += `<strong>Status:</strong> ${response.status} ${response.statusText}<br>`;
+
+                showResult('register-result', message, response.ok);
             } catch (error) {
-                addResult(`❌ Registration test error: ${error.message}`, 'error');
-                updateStatus('Registration test failed', 'error');
+                showResult('register-result', `Error: ${error.message}`, false);
             }
         }
-        
-        function clearResults() {
-            document.getElementById('results').innerHTML = '';
-            updateStatus('Results cleared', 'info');
+
+        async function testLogin() {
+            showInfo('login-result', 'Testing login...');
+            
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Origin': 'http://localhost:3000'
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                });
+
+                const data = await response.json();
+                
+                let message = `<strong>Response:</strong> ${JSON.stringify(data, null, 2)}<br>`;
+                message += `<strong>Status:</strong> ${response.status} ${response.statusText}<br>`;
+
+                showResult('login-result', message, response.ok);
+            } catch (error) {
+                showResult('login-result', `Error: ${error.message}`, false);
+            }
         }
-        
-        // Test environment on load
-        window.onload = function() {
-            addResult(`Current origin: ${window.location.origin}`, 'info');
-            addResult(`API Base URL: ${API_BASE_URL}`, 'info');
-            addResult('Environment check complete. Ready to test.', 'success');
-        };
+
+        async function testWithOrigin() {
+            const selectedOrigin = document.getElementById('origin-select').value;
+            showInfo('origin-result', `Testing with origin: ${selectedOrigin}`);
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Origin': selectedOrigin
+                    },
+                    body: JSON.stringify({
+                        username: 'test_origin_user',
+                        password: 'testpass123'
+                    })
+                });
+
+                const data = await response.json();
+                const headers = Object.fromEntries(response.headers.entries());
+                
+                let message = `<strong>Origin:</strong> ${selectedOrigin}<br>`;
+                message += `<strong>Response:</strong> ${JSON.stringify(data, null, 2)}<br>`;
+                message += `<strong>Status:</strong> ${response.status} ${response.statusText}<br>`;
+                
+                if (headers['access-control-allow-origin']) {
+                    message += `<strong>Allowed Origin:</strong> ${headers['access-control-allow-origin']}<br>`;
+                }
+
+                showResult('origin-result', message, response.ok);
+            } catch (error) {
+                showResult('origin-result', `Error: ${error.message}`, false);
+            }
+        }
     </script>
 </body>
 </html>
