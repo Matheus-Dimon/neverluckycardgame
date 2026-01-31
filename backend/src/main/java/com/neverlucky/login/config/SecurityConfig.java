@@ -53,14 +53,13 @@ public class SecurityConfig {
                 "http://localhost:8080",
                 "https://*.vercel.app",
                 // Adicione seu domínio específico do Vercel
-                "https://neverluckycardgame-jqhgd1u0k-matheus-dimons-projects.vercel.app",
-                "https://neverluckycardgame-qhs9p5mhm-matheus-dimons-projects.vercel.app",
-                "https://neverluckycardgame-qq7diyd3d-matheus-dimons-projects.vercel.app",
-                "https://neverluckycardgame-2bln9gesk-matheus-dimons-projects.vercel.app",
                 "https://neverluckycardgame.vercel.app",
-                "https://neverluckycardgame-matheus-dimons-projects.vercel.app",
-                "https://neverluckycardgame-git-master-matheus-dimons-projects.vercel.app",
-                "https://neverluckycardgame-bn2n8mkm1-matheus-dimons-projects.vercel.app"
+                "https://neverluckycardgame-matheus-dimons-projects.vercel.app"
+        ));
+
+        // Allow Render deployment URLs
+        config.setAllowedOrigins(Arrays.asList(
+                "https://neverlucky-backend-x0rh.onrender.com"
         ));
 
         // Allow all HTTP methods
