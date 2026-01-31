@@ -1,26 +1,33 @@
+spring:
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+---
+spring:
+  profiles: dev
+
 server:
   port: ${PORT:8080}
 
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/neverlucky
-    username: neverlucky_user
-    password: BJs1RxxJzuQ1G4wsGmIbToHcUpQ6WMvn
-    driver-class-name: org.postgresql.Driver
-    hikari:
-      maximum-pool-size: 5
-      minimum-idle: 2
-      connection-timeout: 20000
+datasource:
+  url: jdbc:postgresql://localhost:5432/neverlucky
+  username: neverlucky_user
+  password: BJs1RxxJzuQ1G4wsGmIbToHcUpQ6WMvn
+  driver-class-name: org.postgresql.Driver
+  hikari:
+    maximum-pool-size: 5
+    minimum-idle: 2
+    connection-timeout: 20000
   
-  jpa:
+jpa:
+  hibernate:
+    ddl-auto: update
+  show-sql: false
+  properties:
     hibernate:
-      ddl-auto: update
-    show-sql: false
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
-    open-in-view: false
+      dialect: org.hibernate.dialect.PostgreSQLDialect
+      format_sql: true
+  open-in-view: false
 
 jwt:
   secret: ${JWT_SECRET:MinhaChaveJWTUltraSeguraComMaisDe32Caracteres123456}
@@ -33,3 +40,9 @@ logging:
   level:
     org.hibernate.SQL: info
     org.springframework.web: info
+
+---
+spring:
+  profiles: prod
+
+# Production configuration will be loaded from application-prod.yml
